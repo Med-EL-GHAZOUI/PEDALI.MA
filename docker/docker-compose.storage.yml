@@ -1,0 +1,63 @@
+# Partie 1 - Personne 2 : MinIO (stockage objet), creation du bucket "lake", Jupyter/PySpark.
+# Fichier separe pour eviter les conflits avec le docker-compose.yml de la Personne 1
+# (Kafka, Spark Master, Workers). Lancement combine :
+#   docker compose -f docker-compose.yml -f docker-compose.storage.yml up -d
+# Les deux fichiers partagent le reseau "pedali-net".
+
+services:
+  minio:
+    # Images minio/* retirees de Docker Hub : utilisation des images Chainguard.
+    image: cgr.dev/chainguard/minio:latest
+    container_name: pedali-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin123}
+    ports:
+      - "9000:9000"   # API S3
+      - "9001:9001"   # Console web
+    volumes:
+      - minio-data:/data
+    networks: [pedali-net]
+
+  minio-init:
+    image: cgr.dev/chainguard/minio-client:latest
+    container_name: pedali-minio-init
+    depends_on:
+      - minio
+    restart: on-failure   # MinIO peut ne pas etre pret au premier essai
+    environment:
+      MC_HOST_local: http://${MINIO_ROOT_USER:-minioadmin}:${MINIO_ROOT_PASSWORD:-minioadmin123}@minio:9000
+    entrypoint: ["/usr/bin/mc"]
+    command: ["mb", "--ignore-existing", "local/lake"]
+    networks: [pedali-net]
+
+  jupyter:
+    # Spark 3.5.x : doit correspondre a la version du cluster Spark de la Personne 1.
+    image: quay.io/jupyter/pyspark-notebook:spark-3.5.3
+    container_name: pedali-jupyter
+    user: root
+    environment:
+      NB_USER: jovyan
+      GRANT_SUDO: "yes"
+      JUPYTER_TOKEN: ${JUPYTER_TOKEN:-pedali}
+      SPARK_MASTER: spark://spark-master:7077
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin123}
+    ports:
+      - "8888:8888"
+      - "4040:4040"   # Spark UI de l'application (driver)
+    volumes:
+      - ../notebooks:/home/jovyan/work/notebooks
+      - ../data:/home/jovyan/work/data
+    depends_on:
+      - minio-init
+    networks: [pedali-net]
+
+volumes:
+  minio-data:
+
+networks:
+  pedali-net:
+    name: pedali-net
