@@ -1,0 +1,98 @@
+[
+  {
+    "station_id": "S01",
+    "name": "Casa Port",
+    "city": "Casablanca",
+    "lat": 33.602,
+    "lon": -7.618,
+    "capacity": 20
+  },
+  {
+    "station_id": "S02",
+    "name": "Maarif",
+    "city": "Casablanca",
+    "lat": 33.587,
+    "lon": -7.635,
+    "capacity": 25
+  },
+  {
+    "station_id": "S03",
+    "name": "Ain Diab",
+    "city": "Casablanca",
+    "lat": 33.595,
+    "lon": -7.67,
+    "capacity": 30
+  },
+  {
+    "station_id": "S04",
+    "name": "Hay Hassani",
+    "city": "Casablanca",
+    "lat": 33.565,
+    "lon": -7.66,
+    "capacity": 15
+  },
+  {
+    "station_id": "S05",
+    "name": "Jemaa el-Fna",
+    "city": "Marrakech",
+    "lat": 31.6258,
+    "lon": -7.9891,
+    "capacity": 30
+  },
+  {
+    "station_id": "S06",
+    "name": "Majorelle",
+    "city": "Marrakech",
+    "lat": 31.6417,
+    "lon": -8.003,
+    "capacity": 20
+  },
+  {
+    "station_id": "S07",
+    "name": "Menara",
+    "city": "Marrakech",
+    "lat": 31.6148,
+    "lon": -8.021,
+    "capacity": 20
+  },
+  {
+    "station_id": "S08",
+    "name": "Gueliz",
+    "city": "Marrakech",
+    "lat": 31.634,
+    "lon": -8.01,
+    "capacity": 25
+  },
+  {
+    "station_id": "S09",
+    "name": "Agdal Rabat",
+    "city": "Rabat",
+    "lat": 33.999,
+    "lon": -6.85,
+    "capacity": 20
+  },
+  {
+    "station_id": "S10",
+    "name": "Hay Riad",
+    "city": "Rabat",
+    "lat": 33.957,
+    "lon": -6.87,
+    "capacity": 20
+  },
+  {
+    "station_id": "S11",
+    "name": "Rabat Ville",
+    "city": "Rabat",
+    "lat": 34.02,
+    "lon": -6.83,
+    "capacity": 30
+  },
+  {
+    "station_id": "S12",
+    "name": "Kasbah Oudayas",
+    "city": "Rabat",
+    "lat": 34.03,
+    "lon": -6.835,
+    "capacity": 15
+  }
+]
