@@ -3,3 +3,4 @@ docker/.env
 __pycache__/
 *.parquet
 spark-warehouse/
+data/trips_history.jsonl
