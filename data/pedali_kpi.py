@@ -12,7 +12,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
 
 
-def _kpi_aggs():
+def kpi_aggregations():
     done = F.col("status") == "completed"
     return [
         F.count("*").alias("trajets_valides"),
@@ -25,16 +25,16 @@ def _kpi_aggs():
 
 
 def kpis_global(valid_trips: DataFrame) -> DataFrame:
-    return valid_trips.agg(*_kpi_aggs())
+    return valid_trips.agg(*kpi_aggregations())
 
 
 def kpis_by(valid_trips: DataFrame, *cols: str) -> DataFrame:
-    return valid_trips.groupBy(*cols).agg(*_kpi_aggs()).orderBy(*cols)
+    return valid_trips.groupBy(*cols).agg(*kpi_aggregations()).orderBy(*cols)
 
 
 def kpis_by_window(valid_trips: DataFrame, duration: str = "1 hour") -> DataFrame:
     """KPI par fenetre temporelle sur start_time (utile en batch ; en streaming ajouter withWatermark)."""
     return (valid_trips.groupBy(F.window("start_time", duration).alias("fenetre"))
-            .agg(*_kpi_aggs())
+            .agg(*kpi_aggregations())
             .select(F.col("fenetre.start").alias("debut"), F.col("fenetre.end").alias("fin"), "*")
             .drop("fenetre").orderBy("debut"))

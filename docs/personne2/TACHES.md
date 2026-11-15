@@ -24,7 +24,7 @@ Branche Git : `personne2`
 - [x] explain(True) / plan Catalyst, comparaison RDD vs DataFrame (meme notebook ; capture du plan a faire sur le cluster)
 
 ## Partie 4 - Streaming
-- [ ] Watermark, evenements en retard, doublons, modes de sortie, tests
+- [x] Watermark, evenements en retard, doublons, modes de sortie (update/append/complete), tests : `streaming/stream_kpi.py`, `tests/check_streaming.py` (execute sous Linux/Docker avec source socket ; lecture Kafka non executee), `docs/partie4_streaming.md`
 
 ## Partie 5 - Pipeline
 - [x] KPI definis et verifies (trajets, CA, duree, taux de panne, taux d'annulation) : `data/pedali_kpi.py` + `tests/check_kpi.py` (Spark == Python pur). Fenetres en streaming : a faire (Partie 4/5)
