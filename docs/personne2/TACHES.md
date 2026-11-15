@@ -27,11 +27,11 @@ Branche Git : `personne2`
 - [ ] Watermark, evenements en retard, doublons, modes de sortie, tests
 
 ## Partie 5 - Pipeline
-- [ ] Fenetres temporelles et KPI (trajets, CA, duree, taux de panne, taux d'annulation)
+- [x] KPI definis et verifies (trajets, CA, duree, taux de panne, taux d'annulation) : `data/pedali_kpi.py` + `tests/check_kpi.py` (Spark == Python pur). Fenetres en streaming : a faire (Partie 4/5)
 - [ ] Delta Lake : DESCRIBE HISTORY, tests de reprise
 
 ## Partie 6 - Graphes
-- [ ] Sommets/aretes depuis Silver
-- [ ] Motifs GraphFrames, degres, soldes nets, stations source/puits
-- [ ] GraphX (Scala) : degrees, PageRank, connectedComponents, ShortestPaths
-- [ ] Comparaison, seuils de reequilibrage, visualisation, scenarios injectes
+- [x] Sommets/aretes (depuis les donnees nettoyees ; a rebrancher sur la vraie couche Silver)
+- [x] Motifs GraphFrames, degres, soldes nets, stations source/puits (`graphframes/graph_analysis.py`)
+- [x] GraphX (Scala) : degrees, PageRank, connectedComponents, ShortestPaths (`graphx/GraphAnalysis.scala`, compile et execute en local)
+- [x] Comparaison, seuils de reequilibrage, visualisation, scenarios injectes (`docs/partie6_graphes.md`, `screenshots/reseau_stations.png`)
