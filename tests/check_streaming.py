@@ -53,7 +53,8 @@ BATCHES = [
     [trip("T5", "10:11"), trip("T5x", "10:08"), trip("T1", "10:01"), trip("T6", "10:41")],
     # B3 (watermark courant 10:31) : T7 (10:03) et T8 (10:29) < 10:31 -> TROP EN RETARD ; 3 lignes invalides ; T9 10:50
     [trip("T7", "10:03"), trip("T8", "10:29"), trip("T9", "10:50", "breakdown"),
-     trip("T10", "10:55", user=None), trip("T11", "10:56", dur=-5), trip("T12", "10:57", station="S99")],
+     trip("T10", "10:55", user=None), trip("T11", "10:56", dur=-5), trip("T12", "10:57", station="S99"),
+     trip("T6", "10:41")],  # T6 rejoue apres le lot 2 : doublon, y compris apres une reprise sur checkpoint
     # B4 : fait avancer le watermark (11:20 - 10 min = 11:10) pour fermer les fenetres jusqu'a 11:00
     [trip("T13", "11:20")],
 ]

@@ -1,0 +1,13 @@
+# docker run mc ls --recursive local/lake  (MinIO, bucket lake)
+[2026-11-16 00:42:36 UTC] 1.7KiB STANDARD raw/stations.json
+[2026-11-16 00:42:36 UTC] 5.2MiB STANDARD raw/trips_history.jsonl
+
+# bash tests/check_storage.sh
+[OK]  MinIO API en bonne sante (9000)
+[OK]  Console MinIO accessible (9001)
+[OK]  Bucket 'lake' existe
+[OK]  Jupyter accessible (8888)
+[OK]  Jupyter joint le reseau pedali-net
+[OK]  Jupyter voit MinIO
+[OK]  Jupyter voit spark-master:7077
+Resultat : 7 OK, 0 KO
