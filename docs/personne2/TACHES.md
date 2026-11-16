@@ -17,7 +17,7 @@ Branche Git : `personne2`
 
 ## Partie 2 - RDD
 - [x] Validation independante des resultats RDD / DataFrame (`notebooks/02b_p2_validation_rdd_df.ipynb`, execute en local ; a rejouer sur le cluster)
-- [ ] Captures DAG et stages (Spark UI)
+- [x] Captures DAG et stages (Spark UI) sur le cluster : `screenshots/p2_spark_ui_*.png`, analyse dans `docs/partie_cluster_dag.md` (DAG d'un job DataFrame ; le DAG des RDD reste a faire : les RDD PySpark echouent sur le cluster, Python 3.8 workers vs 3.11 Jupyter)
 
 ## Partie 3 - SQL / DataFrames
 - [x] Referentiel stations, jointures (`notebooks/03b_p2_jointures_explain.ipynb`)
