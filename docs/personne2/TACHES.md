@@ -7,7 +7,7 @@ Branche Git : `personne2`
 - [x] MinIO + bucket `lake`
 - [x] Jupyter (service configure)
 - [x] Tests (`tests/check_storage.sh`) et documentation (`docs/partie1_environnement.md`)
-- [ ] Capture console MinIO + sortie de check_storage.sh
+- [x] Capture console MinIO (`screenshots/p2_minio_bucket_lake.png`) + sortie de check_storage.sh (`reports/minio_storage_check.txt`, 7/7 OK) ; capture Spark Master avec 2 Workers (`screenshots/p2_spark_master_2_workers.png`)
 
 ## Donnees (Parties 2 et 3)
 - [x] Etude de trips_history.jsonl et stations.json, schema documente (`docs/schema_donnees.md`)
