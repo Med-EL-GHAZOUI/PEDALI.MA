@@ -1,49 +1,53 @@
-"""Partie 2 (Personne 1) : calculs RDD sur trips_history.jsonl.
+"""Partie 2 : traitement batch avec SparkCore (RDD) sur trips_history.jsonl.
 
-Revenus par ville, duree moyenne, top 5 des stations de depart (trajets termines, apres nettoyage :
-trip_id unique, user_id non nul, station connue, duree >= 0 -- regles de docs/schema_donnees.md).
+Etapes du sujet : textFile + json.loads -> filter(ENDED) -> map/reduceByKey (CA par ville) ->
+duree moyenne par ville et type de vehicule (aggregateByKey : somme et nombre en un seul passage) ->
+top 5 des stations de depart (takeOrdered) -> lineage (toDebugString).
+
+Le fichier est lu dans MinIO (s3a://lake/bronze/history/, voir scripts/load_history.sh) ; a defaut, sur le disque monte.
+Les evenements dupliques (meme trip_id et meme statut) sont supprimes par un reduceByKey avant les calculs.
+
 Usage (dans Jupyter / le cluster) : python pipeline/rdd_analysis.py
 """
 import json
 import sys
 
-DATA = "/home/jovyan/work/data"   # monte sur Jupyter ET sur les Workers (docker-compose.yml)
+HISTORY = "s3a://lake/bronze/history/trips_history.jsonl"
+LOCAL = "file:///home/jovyan/work/data/trips_history.jsonl"
 
 
-def parse(line):
-    return json.loads(line)
-
-
-def run(spark):
+def run(spark, path: str = HISTORY) -> dict:
     sc = spark.sparkContext
-    sc.addPyFile(__file__)   # les fonctions de ce module sont envoyees aux executors
-    stations = {s["station_id"] for s in json.load(open(f"{DATA}/stations.json", encoding="utf-8"))}
-    known = sc.broadcast(stations)
+    raw = sc.textFile(path).filter(lambda l: l.strip()).map(json.loads)          # transformations (lazy)
 
-    raw = sc.textFile(f"file://{DATA}/trips_history.jsonl").filter(lambda l: l.strip()).map(parse)
-    valid = (raw
-             .filter(lambda t: t["user_id"] and t["start_station_id"] in known.value)
-             .filter(lambda t: t["duration_min"] is None or t["duration_min"] >= 0)
-             .map(lambda t: (t["trip_id"], t))
-             .reduceByKey(lambda a, b: a)          # dedoublonnage sur trip_id
-             .values())
-    done = valid.filter(lambda t: t["status"] == "completed").cache()
+    # dedoublonnage : cle (trip_id, status) -> on garde un seul evenement (shuffle)
+    events = raw.map(lambda e: ((e["trip_id"], e["status"]), e)).reduceByKey(lambda a, b: a).values()
+    ended = events.filter(lambda e: e["status"] == "ENDED").cache()
 
-    revenus = dict(done.map(lambda t: (t["city"], t["price_mad"])).reduceByKey(lambda a, b: a + b).collect())
-    somme, nb = done.map(lambda t: (t["duration_min"], 1)).reduce(lambda a, b: (a[0] + b[0], a[1] + b[1]))
-    top5 = (done.map(lambda t: (t["start_station_id"], 1)).reduceByKey(lambda a, b: a + b)
-            .takeOrdered(5, key=lambda kv: (-kv[1], kv[0])))
-    return {"lignes_brutes": raw.count(), "trajets_termines": nb,
-            "revenus_par_ville": {k: round(v, 2) for k, v in sorted(revenus.items())},
-            "duree_moyenne_min": round(somme / nb, 2), "top5_stations": top5,
-            "lineage": done.toDebugString().decode()}
+    revenue = dict(ended.map(lambda e: (e["city"], e["price_mad"])).reduceByKey(lambda a, b: a + b).collect())   # action
+
+    avg_dur = (ended.map(lambda e: ((e["city"], e["vehicle_type"]), e["duration_s"]))
+               .aggregateByKey((0, 0), lambda acc, d: (acc[0] + d, acc[1] + 1), lambda x, y: (x[0] + y[0], x[1] + y[1]))
+               .mapValues(lambda s: round(s[0] / s[1], 1)).collectAsMap())                                        # action
+
+    top5 = (ended.map(lambda e: (e["start_station"], 1)).reduceByKey(lambda a, b: a + b)
+            .takeOrdered(5, key=lambda kv: (-kv[1], kv[0])))                                                      # action
+
+    return {
+        "evenements_bruts": raw.count(),
+        "evenements_apres_dedoublonnage": events.count(),
+        "trajets_termines": ended.count(),
+        "chiffre_affaires_par_ville": {k: round(v, 2) for k, v in sorted(revenue.items())},
+        "duree_moyenne_s_par_ville_type": {f"{c}/{t}": v for (c, t), v in sorted(avg_dur.items())},
+        "top5_stations_depart": top5,
+        "lineage": ended.toDebugString().decode(),
+    }
 
 
 if __name__ == "__main__":
     sys.path.append("/home/jovyan/work/pipeline")
     from pedali_spark import get_spark
     spark = get_spark("pedali-02-rdd")
-    res = run(spark)
-    for k, v in res.items():
+    for k, v in run(spark).items():
         print(k, ":", v)
     spark.stop()
