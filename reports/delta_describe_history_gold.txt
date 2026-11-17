@@ -1,0 +1,35 @@
+# DESCRIBE HISTORY des tables Delta Gold (et Silver) - MinIO s3a://lake
+=== DESCRIBE HISTORY delta.`s3a://lake/gold/kpi_city_day` ===
++-------+-------------------+---------+------------------------------------------------------------+
+|version|          timestamp|operation|                                            operationMetrics|
++-------+-------------------+---------+------------------------------------------------------------+
+|      4|2026-11-17 03:31:08|    WRITE|{numFiles -> 1, numOutputRows -> 90, numOutputBytes -> 5720}|
+|      3|2026-11-17 03:30:53|    WRITE|{numFiles -> 1, numOutputRows -> 90, numOutputBytes -> 5692}|
+|      2|2026-11-17 03:28:36|    WRITE|{numFiles -> 1, numOutputRows -> 90, numOutputBytes -> 5476}|
+|      1|2026-11-17 03:27:33|    WRITE|{numFiles -> 1, numOutputRows -> 90, numOutputBytes -> 5326}|
+|      0|2026-11-17 03:27:22|    WRITE|  {numFiles -> 1, numOutputRows -> 0, numOutputBytes -> 971}|
++-------+-------------------+---------+------------------------------------------------------------+
+lignes : 90
+=== DESCRIBE HISTORY delta.`s3a://lake/gold/top_stations` ===
++-------+-------------------+---------+------------------------------------------------------------+
+|version|          timestamp|operation|                                            operationMetrics|
++-------+-------------------+---------+------------------------------------------------------------+
+|      4|2026-11-17 03:31:11|    WRITE|{numFiles -> 1, numOutputRows -> 12, numOutputBytes -> 1225}|
+|      3|2026-11-17 03:31:02|    WRITE|{numFiles -> 1, numOutputRows -> 12, numOutputBytes -> 1226}|
+|      2|2026-11-17 03:28:40|    WRITE|{numFiles -> 1, numOutputRows -> 12, numOutputBytes -> 1223}|
+|      1|2026-11-17 03:27:36|    WRITE|{numFiles -> 1, numOutputRows -> 12, numOutputBytes -> 1223}|
+|      0|2026-11-17 03:27:24|    WRITE|  {numFiles -> 1, numOutputRows -> 0, numOutputBytes -> 513}|
++-------+-------------------+---------+------------------------------------------------------------+
+lignes : 12
+=== DESCRIBE HISTORY delta.`s3a://lake/silver/trips` ===
++-------+-------------------+---------+------------------------------------------------------------------------------------------+
+|version|          timestamp|operation|                                                                          operationMetrics|
++-------+-------------------+---------+------------------------------------------------------------------------------------------+
+|      5|2026-11-17 03:31:01|    MERGE|{numTargetRowsCopied -> 0, numTargetRowsDeleted -> 0, numTargetFilesAdded -> 1, numTarg...|
+|      4|2026-11-17 03:30:51|    MERGE|{numTargetRowsCopied -> 0, numTargetRowsDeleted -> 0, numTargetFilesAdded -> 1, numTarg...|
+|      3|2026-11-17 03:30:39|    MERGE|{numTargetRowsCopied -> 0, numTargetRowsDeleted -> 0, numTargetFilesAdded -> 1, numTarg...|
+|      2|2026-11-17 03:28:25|    MERGE|{numTargetRowsCopied -> 0, numTargetRowsDeleted -> 0, numTargetFilesAdded -> 1, numTarg...|
+|      1|2026-11-17 03:27:23|    MERGE|{numTargetRowsCopied -> 0, numTargetRowsDeleted -> 0, numTargetFilesAdded -> 1, numTarg...|
+|      0|2026-11-17 03:27:00|    WRITE|                               {numFiles -> 1, numOutputRows -> 0, numOutputBytes -> 1224}|
++-------+-------------------+---------+------------------------------------------------------------------------------------------+
+lignes : 19709

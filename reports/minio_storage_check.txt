@@ -11,3 +11,13 @@
 [OK]  Jupyter voit MinIO
 [OK]  Jupyter voit spark-master:7077
 Resultat : 7 OK, 0 KO
+
+# bash tests/check_storage.sh (ports lus dans docker/.env : 9010/9011)
+[OK]  MinIO API en bonne sante (9010)
+[OK]  Console MinIO accessible (9011)
+[OK]  Bucket 'lake' existe
+[OK]  Jupyter accessible (8888)
+[OK]  Jupyter joint le reseau pedali-net
+[OK]  Jupyter voit MinIO
+[OK]  Jupyter voit spark-master:7077
+Resultat : 7 OK, 0 KO

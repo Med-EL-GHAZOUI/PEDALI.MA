@@ -20,9 +20,11 @@ Branche Git : `personne1`
 ## Partie 4 - Streaming
 - [x] `producer/producer.py` (cle = start_station_id, debit configurable)
 - [x] Lecture Kafka (Structured Streaming) + parsing JSON + sinks Parquet/console (`pipeline/kafka_stream.py`, `notebooks/04_streaming_kafka.ipynb`)
+- [x] Preuves : micro-batches du sink console (`reports/streaming_console_microbatches.txt`), `kafka-consumer-groups.sh --describe` (`reports/kafka_consumer_groups.txt`)
 
 ## Partie 5 - Pipeline
 - [x] Ecritures Bronze et Silver, indicateurs Gold (Delta Lake) : `pipeline/medallion.py`
+- [x] Preuves des couches : `reports/minio_layers.txt`, DESCRIBE HISTORY Gold : `reports/delta_describe_history_gold.txt`
 - [x] Checkpoints + test arret/redemarrage : `tests/check_pipeline_restart.py`, sortie dans `reports/pipeline_restart_output.txt`
 
 ## Partie 6 - Graphes

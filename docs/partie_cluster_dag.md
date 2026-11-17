@@ -41,8 +41,26 @@ Captures (`screenshots/`) :
 4. Pour que les Workers rappellent le driver, il faut `spark.driver.host=pedali-jupyter` (nom du conteneur sur
    `pedali-net`) et `spark.driver.bindAddress=0.0.0.0`.
 
+> **Mise à jour** : les points 1 à 3 sont corrigés par l'image commune `pedali-spark` (Python 3.11 partout, jars
+> S3A/Delta/Kafka préinstallés, `data/` monté sur les Workers) : voir la section suivante.
+
+## DAG et stages des RDD sur le cluster (Partie 2)
+
+Sortie complète : `reports/rdd_dag_stages.txt` (`pipeline/rdd_analysis.py`, exécuté sur le cluster, 2 Workers).
+Résultats identiques à la référence : 17 673 trajets terminés, durée moyenne 17,56 min, top 5 S01 / S11 / S10 / S05 / S07.
+
+| Job | Action | Stages | Lecture |
+|---|---|---|---|
+| 0 | `collect` (revenus par ville) | 0 → 1 → 2 | 2 shuffles : `reduceByKey` de dédoublonnage sur `trip_id` (1,1 Mo écrit), puis `reduceByKey` par ville |
+| 1 | `reduce` (durée moyenne) | 3 (sauté) → 4 | le stage de dédoublonnage est **sauté** : son résultat de shuffle est réutilisé |
+| 2 | `takeOrdered` (top 5) | 5 (sauté) → 6 → 7 | un seul shuffle neuf (par station) |
+| 3 | `count` (lignes brutes) | 8 | sans shuffle : 2 tâches, une par partition du fichier |
+
+Le `cache()` sur les trajets terminés et la réutilisation des fichiers de shuffle expliquent que les jobs 1 et 2 ne
+recalculent pas la lecture du fichier. Le lineage (`toDebugString`) montre la frontière de shuffle
+(`reduceByKey` → `ShuffledRDD`) : les opérations `filter`/`map` restent dans un même stage (dépendances étroites).
+
 ## Limites
 
-Les chiffres du job lisent les données brutes (sans dédoublonnage) : Casa Port = 2 849 trajets terminés ici contre
-2 815 après nettoyage (`validate_data.py`). Un seul job de démonstration a été capturé ; le DAG détaillé de chaque
-calcul RDD de la Partie 2 reste à faire une fois le décalage de version de Python corrigé.
+Les chiffres du premier job (DataFrame) lisent les données brutes (sans dédoublonnage) : Casa Port = 2 849 trajets
+terminés ici contre 2 815 après nettoyage (`validate_data.py`).

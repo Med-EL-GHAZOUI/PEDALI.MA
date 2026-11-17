@@ -17,21 +17,21 @@ Branche Git : `personne2`
 
 ## Partie 2 - RDD
 - [x] Validation independante des resultats RDD / DataFrame (`notebooks/02b_p2_validation_rdd_df.ipynb`, execute en local ; a rejouer sur le cluster)
-- [x] Captures DAG et stages (Spark UI) sur le cluster : `screenshots/p2_spark_ui_*.png`, analyse dans `docs/partie_cluster_dag.md` (DAG d'un job DataFrame ; le DAG des RDD reste a faire : les RDD PySpark echouent sur le cluster, Python 3.8 workers vs 3.11 Jupyter)
+- [x] Captures DAG et stages (Spark UI) sur le cluster : `screenshots/p2_spark_ui_*.png`, analyse dans `docs/partie_cluster_dag.md` (DAG d'un job DataFrame + DAG/stages des RDD : `reports/rdd_dag_stages.txt`, Python 3.11 aligne par l'image commune)
 
 ## Partie 3 - SQL / DataFrames
 - [x] Referentiel stations, jointures (`notebooks/03b_p2_jointures_explain.ipynb`)
-- [x] explain(True) / plan Catalyst, comparaison RDD vs DataFrame (meme notebook ; capture du plan a faire sur le cluster)
+- [x] explain(True) / plan Catalyst, comparaison RDD vs DataFrame (meme notebook ; plan capture sur le cluster : `screenshots/p2_spark_ui_sql_plan.png`)
 
 ## Partie 4 - Streaming
 - [x] Watermark, evenements en retard, doublons, modes de sortie (update/append/complete), tests : `streaming/stream_kpi.py`, `tests/check_streaming.py` (execute sous Linux/Docker avec source socket ; lecture Kafka non executee), `docs/partie4_streaming.md`
 
 ## Partie 5 - Pipeline
 - [x] KPI definis et verifies (trajets, CA, duree, taux de panne, taux d'annulation) : `data/pedali_kpi.py` + `tests/check_kpi.py` (Spark == Python pur). Fenetres en streaming : a faire (Partie 4/5)
-- [x] Delta Lake : DESCRIBE HISTORY (`reports/delta_describe_history.txt`), test d'arret/reprise (`tests/check_delta_recovery.py`, `docs/partie5_delta.md`)
+- [x] Delta Lake : DESCRIBE HISTORY (`reports/delta_describe_history.txt` ; table Gold : `reports/delta_describe_history_gold.txt`), test d'arret/reprise (`tests/check_delta_recovery.py`, `docs/partie5_delta.md`)
 
 ## Partie 6 - Graphes
-- [x] Sommets/aretes (depuis les donnees nettoyees ; a rebrancher sur la vraie couche Silver)
+- [x] Sommets/aretes (donnees nettoyees ; rebranche sur la couche Silver par la Personne 1 : `pipeline/graph_on_silver.py`)
 - [x] Motifs GraphFrames, degres, soldes nets, stations source/puits (`graphframes/graph_analysis.py`)
 - [x] GraphX (Scala) : degrees, PageRank, connectedComponents, ShortestPaths (`graphx/GraphAnalysis.scala`, compile et execute en local)
 - [x] Comparaison, seuils de reequilibrage, visualisation, scenarios injectes (`docs/partie6_graphes.md`, `screenshots/reseau_stations.png`)
