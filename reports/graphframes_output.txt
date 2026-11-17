@@ -1,0 +1,131 @@
+Graphe : 400 sommets, 11484 aretes (couples de stations), 12918 aretes par periode
+Boucles (depart = arrivee) mises a part : 0 trajets ; aretes orphelines : 0
+== Sommets et aretes par ville ==
++----------+-------+------+-------+
+|      city|sommets|aretes|trajets|
++----------+-------+------+-------+
+|Casablanca|    100|  3702|   5268|
+| Marrakech|    100|  2747|   3619|
+|     Rabat|    100|  2528|   3031|
+|    Tanger|    100|  2507|   2962|
++----------+-------+------+-------+
+verification : aucune arete orpheline
+preparation + comptages : 77.2 s
+export Parquet : s3a://lake/gold/graph_export/(sommets|aretes|aretes_periode)
+== Corridors les plus frequentes (>= 3 trajets) ==
++--------------------+----------+-------+-----------+---------------+
+|corridor            |city      |trajets|duree_moy_s|distance_moy_km|
++--------------------+----------+-------+-----------+---------------+
+|S-MAR-003->S-MAR-007|Marrakech |61     |1067.0     |4.38           |
+|S-MAR-007->S-MAR-009|Marrakech |57     |1066.4     |4.58           |
+|S-MAR-009->S-MAR-003|Marrakech |46     |997.0      |4.45           |
+|S-CAS-005->S-CAS-092|Casablanca|12     |1279.8     |5.9            |
+|S-CAS-005->S-CAS-071|Casablanca|8      |1001.9     |4.67           |
+|S-CAS-005->S-CAS-058|Casablanca|8      |967.9      |3.56           |
+|S-CAS-005->S-CAS-099|Casablanca|8      |1105.8     |4.56           |
+|S-CAS-011->S-CAS-044|Casablanca|7      |1088.9     |4.43           |
+|S-CAS-005->S-CAS-057|Casablanca|7      |940.4      |4.58           |
+|S-CAS-005->S-CAS-061|Casablanca|7      |1021.4     |4.04           |
++--------------------+----------+-------+-----------+---------------+
+only showing top 10 rows
+== Allers-retours A->B et B->A (aretes >= 3) : 29 paires ==
++---------+---------+----------+--------+--------+-----+
+|station_a|station_b|city      |a_vers_b|b_vers_a|total|
++---------+---------+----------+--------+--------+-----+
+|S-CAS-011|S-CAS-044|Casablanca|7       |4       |11   |
+|S-CAS-011|S-CAS-029|Casablanca|4       |5       |9    |
+|S-MAR-069|S-MAR-099|Marrakech |3       |5       |8    |
+|S-CAS-028|S-CAS-068|Casablanca|5       |3       |8    |
+|S-CAS-023|S-CAS-073|Casablanca|4       |4       |8    |
+|S-MAR-025|S-MAR-047|Marrakech |4       |4       |8    |
+|S-CAS-029|S-CAS-084|Casablanca|4       |3       |7    |
+|S-CAS-027|S-CAS-030|Casablanca|3       |4       |7    |
+|S-CAS-061|S-CAS-084|Casablanca|3       |4       |7    |
+|S-CAS-045|S-CAS-089|Casablanca|3       |4       |7    |
++---------+---------+----------+--------+--------+-----+
+only showing top 10 rows
+== Boucles a trois stations A->B->C->A (aretes >= 3) : 12 boucles ==
++---------+---------+---------+----------+---+---+---+-----+
+|a        |b        |c        |city      |a_b|b_c|c_a|total|
++---------+---------+---------+----------+---+---+---+-----+
+|S-MAR-003|S-MAR-007|S-MAR-009|Marrakech |61 |57 |46 |164  |
+|S-CAS-011|S-CAS-097|S-CAS-041|Casablanca|3  |4  |4  |11   |
+|S-CAS-011|S-CAS-097|S-CAS-029|Casablanca|3  |3  |5  |11   |
+|S-CAS-013|S-CAS-027|S-CAS-028|Casablanca|3  |3  |5  |11   |
+|S-CAS-003|S-CAS-011|S-CAS-029|Casablanca|3  |4  |3  |10   |
+|S-CAS-003|S-CAS-011|S-CAS-097|Casablanca|3  |3  |4  |10   |
+|S-CAS-013|S-CAS-097|S-CAS-051|Casablanca|4  |3  |3  |10   |
+|S-CAS-011|S-CAS-025|S-CAS-096|Casablanca|3  |4  |3  |10   |
+|S-CAS-037|S-CAS-096|S-CAS-051|Casablanca|3  |3  |3  |9    |
+|S-CAS-017|S-CAS-072|S-CAS-021|Casablanca|3  |3  |3  |9    |
++---------+---------+---------+----------+---+---+---+-----+
+only showing top 10 rows
+motifs : 6.6 s
+== Degres : 10 stations avec le plus de departs ==
++---------+--------------------------------+----------+---------------+--------+----------------+----------------+-------+--------+
+|id       |name                            |city      |zone_type      |capacity|voisins_sortants|voisins_entrants|departs|arrivees|
++---------+--------------------------------+----------+---------------+--------+----------------+----------------+-------+--------+
+|S-CAS-005|Maarif tourisme 005             |Casablanca|tourisme       |15      |97              |0               |343    |0       |
+|S-CAS-097|Sidi Maarouf centre affaires 097|Casablanca|centre_affaires|15      |55              |48              |93     |82      |
+|S-CAS-096|Ain Sebaa centre affaires 096   |Casablanca|centre_affaires|25      |48              |53              |87     |92      |
+|S-MAR-007|Jemaa el-Fna tourisme 007       |Marrakech |tourisme       |25      |27              |29              |87     |90      |
+|S-CAS-084|Hay Hassani centre affaires 084 |Casablanca|centre_affaires|30      |49              |58              |85     |104     |
+|S-CAS-074|Sidi Maarouf centre affaires 074|Casablanca|centre_affaires|10      |45              |45              |83     |65      |
+|S-MAR-003|Palmeraie tourisme 003          |Marrakech |tourisme       |25      |21              |20              |83     |68      |
+|S-CAS-011|Oasis centre affaires 011       |Casablanca|centre_affaires|20      |44              |51              |79     |88      |
+|S-CAS-045|Oasis centre affaires 045       |Casablanca|centre_affaires|20      |44              |48              |79     |85      |
+|S-CAS-027|Ain Diab centre affaires 027    |Casablanca|centre_affaires|20      |50              |59              |77     |93      |
++---------+--------------------------------+----------+---------------+--------+----------------+----------------+-------+--------+
+only showing top 10 rows
+PageRank GraphFrames (non pondere, 10 iterations) : 9.0 s
++---------+----------+------------------+
+|       id|      city|              rank|
++---------+----------+------------------+
+|S-RAB-072|     Rabat|1.6406534584681458|
+|S-MAR-064| Marrakech|1.5605270405632377|
+|S-CAS-027|Casablanca|1.5116321884484416|
+|S-CAS-084|Casablanca|1.5001532350714757|
+|S-MAR-015| Marrakech| 1.492328118420633|
++---------+----------+------------------+
+only showing top 5 rows
+== Soldes nets journaliers : stations qui se vident / saturent (rapport a la capacite) ==
++---------+----------+----------------------------------+----------+---------------+--------+--------------+
+|id       |solde_jour|name                              |city      |zone_type      |capacity|ratio_capacite|
++---------+----------+----------------------------------+----------+---------------+--------+--------------+
+|S-CAS-005|-11.43    |Maarif tourisme 005               |Casablanca|tourisme       |15      |0.762         |
+|S-CAS-077|-0.77     |Casa Port residentiel 077         |Casablanca|residentiel    |25      |0.031         |
+|S-MAR-059|-0.7      |Gueliz residentiel 059            |Marrakech |residentiel    |20      |0.035         |
+|S-RAB-021|-0.67     |Kasbah des Oudayas residentiel 021|Rabat     |residentiel    |10      |0.067         |
+|S-TAN-068|-0.67     |Playa residentiel 068             |Tanger    |residentiel    |25      |0.027         |
+|S-CAS-074|-0.6      |Sidi Maarouf centre affaires 074  |Casablanca|centre_affaires|10      |0.06          |
+|S-RAB-031|-0.6      |Ocean residentiel 031             |Rabat     |residentiel    |20      |0.03          |
+|S-RAB-022|-0.6      |Kasbah des Oudayas residentiel 022|Rabat     |residentiel    |25      |0.024         |
++---------+----------+----------------------------------+----------+---------------+--------+--------------+
+only showing top 8 rows
++---------+----------+--------------------------------+----------+---------------+--------+--------------+
+|id       |solde_jour|name                            |city      |zone_type      |capacity|ratio_capacite|
++---------+----------+--------------------------------+----------+---------------+--------+--------------+
+|S-CAS-072|1.13      |Maarif centre affaires 072      |Casablanca|centre_affaires|25      |0.045         |
+|S-CAS-078|1.1       |Ain Sebaa centre affaires 078   |Casablanca|centre_affaires|10      |0.11          |
+|S-CAS-004|0.97      |Ain Sebaa plage 004             |Casablanca|plage          |25      |0.039         |
+|S-CAS-033|0.87      |Anfa residentiel 033            |Casablanca|residentiel    |10      |0.087         |
+|S-CAS-073|0.87      |Sidi Maarouf centre affaires 073|Casablanca|centre_affaires|15      |0.058         |
++---------+----------+--------------------------------+----------+---------------+--------+--------------+
+only showing top 5 rows
+== Solde net journalier par type de zone et par periode (flux pendulaires) ==
++---------------+-----+-------+-----+
+|zone_type      |matin|journee|soir |
++---------------+-----+-------+-----+
+|centre_affaires|51.4 |2.2    |-42.2|
+|commercial     |1.4  |0.4    |1.7  |
+|gare           |-0.4 |0.2    |-0.8 |
+|plage          |0.5  |1.5    |0.3  |
+|residentiel    |-50.3|-0.9   |44.1 |
+|tourisme       |-2.7 |-4.4   |-3.7 |
+|universite     |0.0  |1.1    |0.6  |
++---------------+-----+-------+-----+
+== Recommandations de reequilibrage (alerte >= 30%, urgence >= 50% de la capacite par jour) : 1 couples ==
+   source     cible       city  niveau  solde_source_jour  ratio_capacite  solde_cible_jour  distance_km
+S-CAS-005 S-CAS-084 Casablanca urgence             -11.43           0.762              0.63         1.61
+Resultats ecrits dans s3a://lake/gold/graph_analysis (partitionne par city et result_type) : 2642 lignes
+duree totale : 145.1 s

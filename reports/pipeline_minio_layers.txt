@@ -1,0 +1,47 @@
+# mc ls --recursive local/lake/ : couches Bronze, Silver, Gold (jalon 2) - 2026-11-17 05:00 UTC
+## bronze/trips_raw (extrait)
+[2026-11-17 04:47:28 UTC] 154KiB STANDARD part-00000-019339c4-dc3a-484b-82a1-fe0c26341da8-c000.json
+[2026-11-17 04:39:05 UTC] 2.7KiB STANDARD part-00000-028b9965-862b-41e4-8db6-6b35d421c52e-c000.json
+[2026-11-17 04:47:40 UTC] 154KiB STANDARD part-00000-054fb969-fc0f-43c2-a1a9-da9d7ba70f77-c000.json
+[2026-11-17 04:47:50 UTC] 154KiB STANDARD part-00000-05ab250f-c15c-4955-a744-d523c0713dc2-c000.json
+[2026-11-17 04:47:09 UTC] 154KiB STANDARD part-00000-094bef48-93d5-49a3-8069-a6cab8c4c1c2-c000.json
+[2026-11-17 04:46:50 UTC] 154KiB STANDARD part-00000-0f66d20e-8c76-4a2a-b952-08f14a0f043f-c000.json
+   ... 159 fichiers au total
+## silver/trips_clean (extrait)
+[2026-11-17 04:38:31 UTC]  10KiB STANDARD city=Casablanca/date=2026-10-17/part-00000-201cee92-86ba-40d0-80a9-96b280eaf2f6.c000.snappy.parquet
+[2026-11-17 04:38:38 UTC] 9.7KiB STANDARD city=Casablanca/date=2026-10-17/part-00000-8f88e8a0-2a48-44e2-b7f8-4a74b3717c89.c000.snappy.parquet
+[2026-11-17 04:38:31 UTC] 9.8KiB STANDARD city=Casablanca/date=2026-10-17/part-00001-48b466d9-d29b-4438-af66-ece861753d79.c000.snappy.parquet
+[2026-11-17 04:38:39 UTC] 9.5KiB STANDARD city=Casablanca/date=2026-10-17/part-00001-51f4fd96-57d7-41f2-a645-51223bfddc78.c000.snappy.parquet
+[2026-11-17 04:38:32 UTC]  10KiB STANDARD city=Casablanca/date=2026-10-17/part-00002-3d27e9bb-0149-4405-92e7-b3158415ea78.c000.snappy.parquet
+[2026-11-17 04:38:38 UTC] 9.5KiB STANDARD city=Casablanca/date=2026-10-17/part-00002-b4aa7c93-6eb8-4c6f-92f0-8a8c7daca668.c000.snappy.parquet
+   ... 1063 fichiers au total
+## gold/kpi_city_10min (extrait)
+[2026-11-17 04:54:20 UTC] 3.7KiB STANDARD part-00000-01e30128-c1d2-4c57-bb8a-af2ae0d23ddc-c000.snappy.parquet
+[2026-11-17 04:43:43 UTC] 3.4KiB STANDARD part-00000-0704f782-e4f5-4623-befa-4f78479e5008-c000.snappy.parquet
+[2026-11-17 04:50:51 UTC] 3.4KiB STANDARD part-00000-08609f93-08a4-484e-b109-3e52602c013d-c000.snappy.parquet
+[2026-11-17 04:39:05 UTC] 3.5KiB STANDARD part-00000-08dab054-c4ea-44e7-a431-3d1268b02a43-c000.snappy.parquet
+[2026-11-17 04:43:37 UTC] 3.7KiB STANDARD part-00000-0987319b-06be-48d3-87c7-e628c61148cc-c000.snappy.parquet
+[2026-11-17 04:39:28 UTC] 3.6KiB STANDARD part-00000-0a1fe648-e391-430b-a90b-6ba1409c66c6-c000.snappy.parquet
+   ... 160 fichiers au total
+## gold/rates_city_sliding (extrait)
+[2026-11-17 04:54:34 UTC] 4.5KiB STANDARD part-00000-07452199-5cdd-45ca-9451-529ef281686f-c000.snappy.parquet
+[2026-11-17 04:51:25 UTC] 4.0KiB STANDARD part-00000-09c6d9ca-7110-4302-81b5-bf5a6844e607-c000.snappy.parquet
+[2026-11-17 04:51:18 UTC] 4.3KiB STANDARD part-00000-0acb4661-25af-4f85-acf6-40b423b1f1af-c000.snappy.parquet
+[2026-11-17 04:53:03 UTC] 4.1KiB STANDARD part-00000-0e2cd0cf-1c98-4ab1-954e-be36319fdf42-c000.snappy.parquet
+[2026-11-17 04:55:05 UTC] 4.0KiB STANDARD part-00000-11356660-6138-4439-9cec-9f896cbe1b20-c000.snappy.parquet
+[2026-11-17 04:47:00 UTC]   767B STANDARD part-00000-176fac1a-dc28-4477-82f4-7fac2d5c106e-c000.snappy.parquet
+   ... 154 fichiers au total
+## gold/user_sessions (extrait)
+[2026-11-17 04:48:37 UTC] 7.1KiB STANDARD part-00000-0468018d-2733-45c4-b7b2-0d1df5916046-c000.snappy.parquet
+[2026-11-17 04:50:30 UTC] 5.8KiB STANDARD part-00000-0633e229-9504-494f-b798-3933be7fc6a9-c000.snappy.parquet
+[2026-11-17 04:52:59 UTC] 6.4KiB STANDARD part-00000-0744e5ce-a993-40c1-aa93-fad6a8b93d10-c000.snappy.parquet
+[2026-11-17 04:50:54 UTC] 6.4KiB STANDARD part-00000-0e887a27-d947-4bcb-b6be-f5d45862ef81-c000.snappy.parquet
+[2026-11-17 04:49:03 UTC] 6.0KiB STANDARD part-00000-1f6dcb6f-3c76-4fbe-a63b-c8b0c796b0ca-c000.snappy.parquet
+[2026-11-17 04:48:48 UTC] 6.0KiB STANDARD part-00000-23be5a58-1ac9-4af8-824f-17fd79b24de2-c000.snappy.parquet
+   ... 154 fichiers au total
+## checkpoints
+[2026-11-17 05:00:59 UTC]     0B p4_bronze_raw/
+[2026-11-17 05:00:59 UTC]     0B p5_gold_10min/
+[2026-11-17 05:00:59 UTC]     0B p5_gold_sessions/
+[2026-11-17 05:00:59 UTC]     0B p5_gold_sliding/
+[2026-11-17 05:00:59 UTC]     0B p5_silver/

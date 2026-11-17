@@ -137,6 +137,9 @@ def main():
     ap.add_argument("--stations", default=str(DATA / "stations.json"))
     ap.add_argument("--bootstrap", default="localhost:29092")
     ap.add_argument("--topic", default="trips")
+    ap.add_argument("--skip", type=int, default=0, help="mode kafka : ignorer les N premiers evenements")
+    ap.add_argument("--limit", type=int, default=0, help="mode kafka : nombre max d'evenements a envoyer (0 = tous)")
+    ap.add_argument("--shift-to-now", action="store_true", help="mode kafka : decaler les dates pour que le dernier evenement soit maintenant")
     args = ap.parse_args()
 
     if not Path(args.stations).exists():
@@ -151,8 +154,12 @@ def main():
         return
 
     from kafka import KafkaProducer                       # import tardif : inutile en mode fichier
-    # on decale les dates pour que le dernier evenement soit "maintenant" (watermark / fenetres coherents)
-    shift = datetime.now(timezone.utc) - datetime.strptime(events[-1]["event_time"], FMT).replace(tzinfo=timezone.utc)
+    # Par defaut les event_time du fichier sont conserves (relecture deterministe, tranches coherentes entre
+    # plusieurs lancements). --shift-to-now decale les dates pour que le dernier evenement soit "maintenant".
+    shift = timedelta(0)
+    if args.shift_to_now:
+        shift = datetime.now(timezone.utc) - datetime.strptime(events[-1]["event_time"], FMT).replace(tzinfo=timezone.utc)
+    events = events[args.skip:args.skip + args.limit] if args.limit else events[args.skip:]
     producer = KafkaProducer(bootstrap_servers=args.bootstrap, acks="all", linger_ms=20,
                              key_serializer=lambda k: k.encode(), value_serializer=lambda v: v.encode())
     for i, e in enumerate(events, 1):

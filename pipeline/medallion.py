@@ -1,104 +1,151 @@
-"""Partie 5 (Personne 1) : pipeline Bronze -> Silver -> Gold en Delta Lake sur MinIO.
+"""Partie 5 : pipeline de production Spark-Kafka (Bronze / Silver / Gold).
 
-  Kafka `trips` --(append)--> BRONZE  s3a://lake/bronze/trips   brut + partition/offset/horodatages Kafka
-  BRONZE (stream Delta) --foreachBatch MERGE--> SILVER s3a://lake/silver/trips
-        parse JSON + regles de qualite (P2) + dedoublonnage sur trip_id (MERGE : rejouable sans doublon)
-  SILVER (stream Delta) --foreachBatch--> GOLD s3a://lake/gold/kpi_city_day , gold/top_stations
-        indicateurs recalcules sur toute la couche Silver (petit volume) avec les definitions de data/pedali_kpi.py
+  Kafka trips --+--> BRONZE  s3a://lake/bronze/trips_raw/          JSON bruts (cle, valeur, partition, offset)
+                |
+                +--> nettoyage : watermark 10 min + dropDuplicatesWithinWatermark(["trip_id", "status"])
+                     enrichissement : jointure stream-static avec stations.json (quartier, type de zone) + colonne trip_band
+                     |--> SILVER  s3a://lake/silver/trips_clean/        Parquet partitionne par city et date
+                     |--> fenetre tumbling 10 min par ville (trajets termines, CA, duree moyenne)
+                     |       --> GOLD  s3a://lake/gold/kpi_city_10min/   Delta Lake
+                     |--> fenetre sliding 10 min / pas 5 min par ville (taux de panne, taux d'annulation)
+                     |       --> s3a://lake/gold/rates_city_sliding/     Delta Lake
+                     |--> fenetre session (inactivite 5 min) par user_id (duree, trajets enchaines)
+                             --> s3a://lake/gold/user_sessions/          Delta Lake
 
-Chaque etape a son checkpoint (s3a://lake/checkpoints/<etape>) : apres un arret, la reprise continue
-exactement la ou chaque etape s'est arretee (offsets Kafka pour Bronze, versions Delta pour Silver/Gold).
+Chaque requete a son checkpoint (s3a://lake/checkpoints/p5_*) : apres un arret, la reprise continue aux offsets
+Kafka enregistres dans le checkpoint (source rejouable), avec l'etat de dedoublonnage et de fenetres.
+
+Usage (Jupyter / cluster) : python pipeline/medallion.py --seconds 300
 """
+import argparse
+import json
 import sys
 import time
 
-from delta.tables import DeltaTable
+sys.path.insert(0, "/home/jovyan/work/data")
+sys.path.insert(0, "/home/jovyan/work/pipeline")
+import part4_streaming as p4
+from df_analysis import trip_band_native
+from pedali_schema import read_stations
+from pedali_spark import get_spark
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql import functions as F
 
-sys.path.insert(0, "/home/jovyan/work/data")
-from pedali_kpi import kpi_aggregations
-from pedali_schema import TRIPS_SCHEMA
-
 LAKE = "s3a://lake"
-BRONZE = f"{LAKE}/bronze/trips"
-SILVER = f"{LAKE}/silver/trips"
-GOLD_KPI = f"{LAKE}/gold/kpi_city_day"
-GOLD_TOP = f"{LAKE}/gold/top_stations"
+SILVER = f"{LAKE}/silver/trips_clean"
+GOLD_10MIN = f"{LAKE}/gold/kpi_city_10min"
+GOLD_SLIDING = f"{LAKE}/gold/rates_city_sliding"
+GOLD_SESSIONS = f"{LAKE}/gold/user_sessions"
 CKPT = f"{LAKE}/checkpoints"
-STATIONS = "file:///home/jovyan/work/data/stations.json"
+STATIONS = f"{LAKE}/bronze/history/stations.json"
+WATERMARK = "10 minutes"
+TRIGGER = "5 seconds"
 
 
-def known_stations(spark: SparkSession) -> list:
-    rows = spark.read.option("multiLine", True).json(STATIONS).select("station_id").collect()
-    return [r[0] for r in rows]
+def cleaned_stream(spark: SparkSession, topic: str = p4.TOPIC, max_offsets: int = 1000) -> DataFrame:
+    """Flux nettoye et enrichi (utilise par toutes les requetes ci-dessous)."""
+    events = p4.parse_events(p4.read_kafka(spark, topic=topic, max_offsets=max_offsets)).filter("trip_id IS NOT NULL")
+    deduped = (events.withWatermark("event_time", WATERMARK)
+               .dropDuplicatesWithinWatermark(["trip_id", "status"]))             # re-emissions at-least-once
+    stations = read_stations(spark, STATIONS).select(F.col("station_id").alias("start_station"), "district", "zone_type")
+    enriched = deduped.join(F.broadcast(stations), "start_station", "left")        # jointure stream-static
+    return (enriched.withColumn("trip_band", trip_band_native("duration_s"))
+            .withColumn("date", F.to_date("event_time")))
 
 
-# ---------------------------------------------------------------- BRONZE
-def start_bronze(spark, servers="kafka:9092", topic="trips", trigger="3 seconds", max_offsets=5000):
-    raw = (spark.readStream.format("kafka").option("kafka.bootstrap.servers", servers)
-           .option("subscribe", topic).option("startingOffsets", "earliest")
-           .option("maxOffsetsPerTrigger", max_offsets).option("failOnDataLoss", "false").load()
-           .select(F.col("key").cast("string").alias("cle"), F.col("value").cast("string").alias("value"),
-                   "topic", "partition", "offset", F.col("timestamp").alias("kafka_ts"),
-                   F.current_timestamp().alias("ingest_ts")))
-    return (raw.writeStream.format("delta").outputMode("append").option("checkpointLocation", f"{CKPT}/bronze")
-            .trigger(processingTime=trigger).queryName("bronze").start(BRONZE))
+def start_silver(clean: DataFrame):
+    return (clean.writeStream.format("parquet").outputMode("append").partitionBy("city", "date")
+            .option("path", SILVER).option("checkpointLocation", f"{CKPT}/p5_silver")
+            .trigger(processingTime=TRIGGER).queryName("silver").start())
 
 
-# ---------------------------------------------------------------- SILVER
-def to_silver_rows(batch: DataFrame, stations: list) -> DataFrame:
-    """JSON -> colonnes typees, regles de qualite, un seul exemplaire par trip_id."""
-    parsed = batch.select(F.from_json("value", TRIPS_SCHEMA).alias("t")).select("t.*")
-    return (parsed.filter(F.col("trip_id").isNotNull() & F.col("user_id").isNotNull())
-            .filter(F.col("start_station_id").isin(stations))
-            .filter(F.col("duration_min").isNull() | (F.col("duration_min") >= 0))
-            .dropDuplicates(["trip_id"]))
+def tumbling_kpi(clean: DataFrame) -> DataFrame:
+    """Fenetre tumbling de 10 minutes par ville : trajets termines, chiffre d'affaires, duree moyenne."""
+    return (clean.groupBy(F.window("event_time", "10 minutes").alias("w"), "city")
+            .agg(F.sum(F.when(F.col("status") == "ENDED", 1).otherwise(0)).alias("trajets_termines"),
+                 F.round(F.sum("price_mad"), 2).alias("chiffre_affaires"),
+                 F.round(F.avg("duration_s"), 1).alias("duree_moyenne_s"))
+            .select(F.col("w.start").alias("window_start"), F.col("w.end").alias("window_end"), "city",
+                    "trajets_termines", "chiffre_affaires", "duree_moyenne_s"))
 
 
-def start_silver(spark, trigger="3 seconds"):
-    stations = known_stations(spark)
-    if not DeltaTable.isDeltaTable(spark, SILVER):      # table vide avec schema : permet de la lire en streaming
-        spark.createDataFrame([], TRIPS_SCHEMA).write.format("delta").mode("append").save(SILVER)
-
-    def merge_batch(batch: DataFrame, batch_id: int):
-        rows = to_silver_rows(batch, stations)
-        (DeltaTable.forPath(spark, SILVER).alias("s").merge(rows.alias("n"), "s.trip_id = n.trip_id")
-         .whenNotMatchedInsertAll().execute())          # idempotent : un rejeu n'ajoute rien
-
-    return (spark.readStream.format("delta").load(BRONZE).select("value")
-            .writeStream.foreachBatch(merge_batch).option("checkpointLocation", f"{CKPT}/silver")
-            .trigger(processingTime=trigger).queryName("silver").start())
+def sliding_rates(clean: DataFrame) -> DataFrame:
+    """Fenetre glissante de 10 minutes, pas de 5 minutes, par ville : taux de panne et taux d'annulation."""
+    return (clean.groupBy(F.window("event_time", "10 minutes", "5 minutes").alias("w"), "city")
+            .agg(F.count("*").alias("evenements"),
+                 F.sum(F.when(F.col("status") == "FAULT_REPORTED", 1).otherwise(0)).alias("pannes"),
+                 F.sum(F.when(F.col("status") == "CANCELLED", 1).otherwise(0)).alias("annulations"))
+            .select(F.col("w.start").alias("window_start"), F.col("w.end").alias("window_end"), "city", "evenements",
+                    F.round(F.col("pannes") / F.col("evenements"), 4).alias("taux_panne"),
+                    F.round(F.col("annulations") / F.col("evenements"), 4).alias("taux_annulation")))
 
 
-# ---------------------------------------------------------------- GOLD
-def start_gold(spark, trigger="5 seconds"):
-    def refresh(batch: DataFrame, batch_id: int):
-        silver = spark.read.format("delta").load(SILVER)
-        kpi = (silver.withColumn("jour", F.to_date("start_time")).groupBy("city", "jour")
-               .agg(*kpi_aggregations()).orderBy("city", "jour"))
-        kpi.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save(GOLD_KPI)
-        top = (silver.filter("status = 'completed'").groupBy("start_station_id")
-               .agg(F.count("*").alias("departs"), F.round(F.sum("price_mad"), 2).alias("chiffre_affaires"))
-               .orderBy(F.desc("departs"), "start_station_id"))
-        top.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save(GOLD_TOP)
-
-    return (spark.readStream.format("delta").load(SILVER).select("trip_id")
-            .writeStream.foreachBatch(refresh).option("checkpointLocation", f"{CKPT}/gold")
-            .trigger(processingTime=trigger).queryName("gold").start())
+def user_sessions(clean: DataFrame) -> DataFrame:
+    """Fenetre session (inactivite de 5 minutes) par utilisateur : duree de la session et trajets enchaines."""
+    return (clean.groupBy("user_id", F.session_window("event_time", "5 minutes").alias("s"))
+            .agg((F.unix_timestamp(F.max("event_time")) - F.unix_timestamp(F.min("event_time"))).alias("duree_session_s"),
+                 F.sum(F.when(F.col("status") == "RESERVED", 1).otherwise(0)).alias("trajets_enchaines"))
+            .select("user_id", F.col("s.start").alias("session_start"), F.col("s.end").alias("session_end"),
+                    "duree_session_s", "trajets_enchaines"))
 
 
-def wait_for_table(spark, path, timeout=120):
-    end = time.time() + timeout
+def start_delta(df: DataFrame, path: str, name: str, checkpoint: str):
+    return (df.writeStream.format("delta").outputMode("append").option("path", path)
+            .option("checkpointLocation", f"{CKPT}/{checkpoint}").trigger(processingTime=TRIGGER).queryName(name).start())
+
+
+ALL_QUERIES = ("bronze", "silver", "gold_10min", "gold_sliding", "gold_sessions")
+
+
+def start_all(spark: SparkSession, topic: str = p4.TOPIC, max_offsets: int = 1000, which: tuple = ALL_QUERIES) -> list:
+    """Demarre les requetes demandees (par defaut les cinq). Chaque requete relit Kafka avec son propre checkpoint."""
+    raw = p4.read_kafka(spark, topic=topic, max_offsets=max_offsets)
+    clean = cleaned_stream(spark, topic=topic, max_offsets=max_offsets)
+    builders = {
+        "bronze": lambda: p4.start_bronze_raw(raw),
+        "silver": lambda: start_silver(clean),
+        "gold_10min": lambda: start_delta(tumbling_kpi(clean), GOLD_10MIN, "gold_10min", "p5_gold_10min"),
+        "gold_sliding": lambda: start_delta(sliding_rates(clean), GOLD_SLIDING, "gold_sliding", "p5_gold_sliding"),
+        "gold_sessions": lambda: start_delta(user_sessions(clean), GOLD_SESSIONS, "gold_sessions", "p5_gold_sessions"),
+    }
+    return [builders[name]() for name in which]
+
+
+def _offsets_read(q):
+    """Somme des offsets de fin lus par une requete (None tant qu'aucun micro-batch n'a eu lieu)."""
+    p = q.lastProgress
+    if not p or not p.get("sources"):
+        return None
+    eo = p["sources"][0]["endOffset"]
+    eo = json.loads(eo) if isinstance(eo, str) else eo
+    return sum(v for part in eo.values() for v in part.values())
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--seconds", type=int, default=300)
+    ap.add_argument("--queries", default=",".join(ALL_QUERIES), help="requetes a demarrer (separees par des virgules)")
+    ap.add_argument("--until-total", type=int, default=0,
+                    help="s'arreter des que chaque requete a lu ce nombre d'offsets Kafka (0 = jusqu'a --seconds)")
+    args = ap.parse_args()
+    spark = get_spark("pedali-part5-pipeline", delta=True, spark__sql__shuffle__partitions="3")
+    spark.sparkContext.setLogLevel("ERROR")
+    queries = start_all(spark, which=tuple(args.queries.split(",")))
+    end = time.time() + args.seconds
     while time.time() < end:
-        if DeltaTable.isDeltaTable(spark, path):
-            return
-        time.sleep(2)
-    raise TimeoutError(f"table Delta absente : {path}")
+        time.sleep(15)
+        if args.until_total and all(_offsets_read(q) == args.until_total and not q.status["isDataAvailable"] for q in queries):
+            time.sleep(20)                  # dernier micro-batch (vide) : emission des fenetres fermees par le watermark
+            break
+        for q in queries:
+            p = q.lastProgress
+            if p:
+                print(f"### {q.name:14s} batch {p['batchId']:>3} : {p['numInputRows']:>5} lignes, "
+                      f"{p['processedRowsPerSecond']:.0f} l/s, watermark {p.get('eventTime', {}).get('watermark')}", flush=True)
+    for q in queries:
+        q.stop()
+    spark.stop()
 
 
-def start_all(spark):
-    bronze = start_bronze(spark)
-    wait_for_table(spark, BRONZE)          # Silver lit Bronze en streaming : la table doit exister
-    silver = start_silver(spark)
-    return [bronze, silver, start_gold(spark)]
+if __name__ == "__main__":
+    main()

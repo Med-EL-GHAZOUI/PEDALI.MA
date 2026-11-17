@@ -1,0 +1,53 @@
+# mc ls local/lake/gold/ (jalon 2) : tables Gold et resultats des graphes partitionnes par city et result_type
+[2026-11-17 05:18:11 UTC]     0B graph_analysis/
+[2026-11-17 05:18:11 UTC]     0B graph_export/
+[2026-11-17 05:18:11 UTC]     0B kpi_city_10min/
+[2026-11-17 05:18:11 UTC]     0B rates_city_sliding/
+[2026-11-17 05:18:11 UTC]     0B user_sessions/
+## graph_analysis (city=*/result_type=*)
+_SUCCESS
+city=Casablanca/result_type=allers_retours
+city=Casablanca/result_type=boucles_3
+city=Casablanca/result_type=composantes_graphx
+city=Casablanca/result_type=corridors
+city=Casablanca/result_type=degres
+city=Casablanca/result_type=degres_graphx
+city=Casablanca/result_type=pagerank_graphframes
+city=Casablanca/result_type=pagerank_graphx
+city=Casablanca/result_type=plus_courts_chemins_graphx
+city=Casablanca/result_type=recommandations
+city=Casablanca/result_type=soldes_nets
+city=Casablanca/result_type=soldes_nets_periode
+city=Marrakech/result_type=allers_retours
+city=Marrakech/result_type=boucles_3
+city=Marrakech/result_type=composantes_graphx
+city=Marrakech/result_type=corridors
+city=Marrakech/result_type=degres
+city=Marrakech/result_type=degres_graphx
+city=Marrakech/result_type=pagerank_graphframes
+city=Marrakech/result_type=pagerank_graphx
+city=Marrakech/result_type=plus_courts_chemins_graphx
+city=Marrakech/result_type=soldes_nets
+city=Marrakech/result_type=soldes_nets_periode
+city=Rabat/result_type=allers_retours
+city=Rabat/result_type=composantes_graphx
+city=Rabat/result_type=corridors
+city=Rabat/result_type=degres
+city=Rabat/result_type=degres_graphx
+city=Rabat/result_type=pagerank_graphframes
+city=Rabat/result_type=pagerank_graphx
+city=Rabat/result_type=soldes_nets
+city=Rabat/result_type=soldes_nets_periode
+city=Tanger/result_type=allers_retours
+city=Tanger/result_type=composantes_graphx
+city=Tanger/result_type=corridors
+city=Tanger/result_type=degres
+city=Tanger/result_type=degres_graphx
+city=Tanger/result_type=pagerank_graphframes
+city=Tanger/result_type=pagerank_graphx
+city=Tanger/result_type=soldes_nets
+city=Tanger/result_type=soldes_nets_periode
+## graph_export
+aretes
+aretes_periode
+sommets

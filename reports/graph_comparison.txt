@@ -1,0 +1,25 @@
+== Degres : 399/399 stations identiques entre GraphFrames et GraphX
+   stations absentes cote GraphX (inDegrees ignore les sommets sans arete entrante) : ['S-CAS-005'] -> degres GraphFrames [(0, 97)]
+== PageRank non pondere : correlation GraphFrames / GraphX = 1.0000 (Spearman 1.0000), ecart absolu max = 0.0001
+   top 10 communs : 10/10
+   top 5 GraphFrames : ['S-RAB-072', 'S-MAR-064', 'S-CAS-027', 'S-CAS-084', 'S-MAR-015']
+   top 5 GraphX non pondere : ['S-RAB-072', 'S-MAR-064', 'S-CAS-027', 'S-CAS-084', 'S-MAR-015']
+   top 5 GraphX pondere par les trajets : ['S-MAR-064', 'S-MAR-007', 'S-RAB-072', 'S-CAS-084', 'S-MAR-009']
+   rang de S-CAS-005 (la station qui se vide) : pondere 400/400, non pondere 400
+== Composantes connexes GraphX : 4 composantes de [100, 100, 100, 100] stations = les villes ['Casablanca', 'Marrakech', 'Rabat', 'Tanger']
+== Plus courts chemins : 200 couples (station, gare de reference) atteignables ; sauts moyen 1.64, max 2
+== Scenarios injectes
+1. Station qui se vide : S-CAS-005 solde net -11.43/jour = 76% de sa capacite (15 bornes) -> RETROUVE
+   recommandation : S-CAS-005->S-CAS-084 (urgence, a 1.61 km)
+2. Boucle touristique : boucle n°1 = S-MAR-003->S-MAR-007->S-MAR-009->S-MAR-003 (164 trajets) ; les 3 stations sont de type tourisme a Marrakech -> RETROUVE
+   corridors n°1-3 : [('S-MAR-003->S-MAR-007', 61), ('S-MAR-007->S-MAR-009', 57), ('S-MAR-009->S-MAR-003', 46)]
+3. Flux pendulaires : solde net journalier par type de zone (voir graphframes_output.txt) : residentiel negatif le matin / positif le soir, centre d'affaires l'inverse -> RETROUVE
+4. Vehicule en panne (signalements FAULT_REPORTED par vehicule) :
++----------+-----+
+|vehicle_id|count|
++----------+-----+
+| V-SC-0666|   33|
+| V-BK-0337|    3|
+| V-BK-0688|    3|
++----------+-----+
+only showing top 3 rows

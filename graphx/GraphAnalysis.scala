@@ -1,25 +1,22 @@
-// Partie 6 - Analyse du reseau de stations avec GraphX (Personne 2).
+// Partie 6 - Analyse du reseau de stations avec GraphX (Scala, API RDD).
 //
-// Entree : exports Parquet de graphframes/graph_analysis.py (sommets, aretes), pour que GraphX et
-// GraphFrames travaillent sur exactement le meme graphe. Sommets = stations, aretes = trajets
-// termines agreges par paire (attribut = nombre de trajets).
+// Entree : exports Parquet de graphframes/graph_analysis.py (s3a://lake/gold/graph_export/{sommets,aretes}),
+// donc GraphX et GraphFrames travaillent sur exactement le meme graphe. Sommets = stations, aretes = trajets
+// termines agreges par couple (attribut = nombre de trajets).
+// Calculs : degres, PageRank (non pondere et pondere), connectedComponents, ShortestPaths vers deux gares de reference.
+// Sortie : s3a://lake/gold/graph_analysis/ (mode append, partitionne par city et result_type).
 //
-// Compilation / execution : voir graphx/README.md (Spark 3.5.3, Scala 2.12).
+// Execution (Spark 3.5.3, Scala 2.12) : voir graphx/README.md et scripts/run_graphx.sh.
 import org.apache.spark.graphx._
 import org.apache.spark.graphx.lib.ShortestPaths
 import org.apache.spark.sql.SparkSession
 
 object GraphAnalysis {
 
-  // "S07" -> 7L : GraphX exige des identifiants Long.
-  private def vertexId(stationId: String): Long = stationId.stripPrefix("S").toLong
-  private def stationId(vid: Long): String = f"S$vid%02d"
-
   // PageRank pondere par le nombre de trajets (graph.pageRank de GraphX ignore l'attribut des aretes).
   // Meme convention que GraphX : rang non normalise, la somme vaut le nombre de sommets.
-  private def weightedPageRank(graph: Graph[(String, String), Long], iterations: Int = 30, d: Double = 0.85): VertexRDD[Double] = {
+  private def weightedPageRank(graph: Graph[(String, String, String, String), Long], iterations: Int = 30, d: Double = 0.85): VertexRDD[Double] = {
     val outWeight = graph.aggregateMessages[Double](c => c.sendToSrc(c.attr.toDouble), _ + _)
-    // chaque arete porte la part du poids sortant de sa source ; chaque sommet demarre a 1.0
     var g: Graph[Double, Double] = graph
       .outerJoinVertices(outWeight)((_, _, w) => w.getOrElse(0.0))
       .mapTriplets(t => if (t.srcAttr > 0) t.attr.toDouble / t.srcAttr else 0.0)
@@ -31,85 +28,90 @@ object GraphAnalysis {
     g.vertices
   }
 
-  def main(args: Array[String]): Unit = {
-    val dir = if (args.nonEmpty) args(0) else "reports/graph_exports"
+  private def timed[T](label: String)(body: => T): T = {
+    val t = System.nanoTime
+    val r = body
+    println(f"[temps] $label%-34s ${(System.nanoTime - t) / 1e9}%.1f s")
+    r
+  }
 
-    val spark = SparkSession.builder
-      .appName("pedali-graphx")
-      .master(sys.env.getOrElse("SPARK_MASTER", "local[4]"))
-      .config("spark.sql.shuffle.partitions", "8")
-      .getOrCreate()
-    spark.sparkContext.setLogLevel("ERROR")
+  def main(args: Array[String]): Unit = {
+    val lake = if (args.nonEmpty) args(0) else "s3a://lake"
+    val spark = SparkSession.builder.appName("pedali-graphx").getOrCreate()
+    val sc = spark.sparkContext
+    sc.setLogLevel("ERROR")
     import spark.implicits._
 
-    // GRAPH_FORMAT=csv : lit <dir>/csv/*.csv (test local sous Windows, ou le Parquet Hadoop est inutilisable) ;
-    // par defaut : Parquet (cluster, MinIO).
-    val useCsv = sys.env.get("GRAPH_FORMAT").contains("csv")
-    def read(name: String) =
-      if (useCsv) spark.read.option("header", "true").option("inferSchema", "true").csv(s"$dir/csv/$name.csv")
-      else spark.read.parquet(s"$dir/$name")
+    val vdf = spark.read.parquet(s"$lake/gold/graph_export/sommets").select("id", "name", "city", "zone_type")
+    val edf = spark.read.parquet(s"$lake/gold/graph_export/aretes").select("src", "dst", "trajets")
 
-    val vertices = read("sommets").select("id", "name", "city")
-      .as[(String, String, String)].rdd
-      .map { case (id, name, city) => (vertexId(id), (name, city)) }
+    // Identifiant numerique unique (Long) par station : rang dans l'ordre alphabetique des identifiants.
+    val idMap = vdf.select("id").as[String].rdd.sortBy(identity).zipWithIndex().collectAsMap()
+    val bId = sc.broadcast(idMap)
+    val names = idMap.map(_.swap)                               // Long -> "S-CAS-005"
 
-    val edges = read("aretes").select("src", "dst", "trajets")
-      .selectExpr("src", "dst", "cast(trajets as long) as trajets")
-      .as[(String, String, Long)].rdd
-      .map { case (src, dst, n) => Edge(vertexId(src), vertexId(dst), n) }
-
+    val vertices = vdf.as[(String, String, String, String)].rdd
+      .map { case (id, name, city, zone) => (bId.value(id), (id, name, city, zone)) }
+    val edges = edf.selectExpr("src", "dst", "cast(trajets as long) as trajets").as[(String, String, Long)].rdd
+      .map { case (s, d, n) => Edge(bId.value(s), bId.value(d), n) }
     val graph = Graph(vertices, edges).cache()
-    println(s"Graphe : ${graph.numVertices} sommets, ${graph.numEdges} aretes")
+    println(s"Graphe GraphX : ${graph.numVertices} sommets, ${graph.numEdges} aretes")
 
     // --- Degres
-    println("\n== Degres (aretes entrantes / sortantes) ==")
-    val degrees = graph.inDegrees.join(graph.outDegrees).join(graph.vertices)
-      .map { case (id, ((in, out), (name, city))) => (stationId(id), name, city, in, out) }
-      .sortBy(_._1)
-    degrees.collect().foreach(println)
-
-    // --- PageRank. Non pondere : le reseau est regulier (3 voisins entrants/sortants partout), donc
-    // tous les rangs valent 1.0 -> peu informatif. Le PageRank pondere par les trajets distingue les stations.
-    println("\n== PageRank non pondere (GraphX, tol = 0.0001) ==")
-    graph.pageRank(0.0001).vertices.join(graph.vertices).sortBy(_._1).collect().foreach {
-      case (id, (rank, (name, _))) => println(f"${stationId(id)} $name%-16s $rank%.4f")
+    val degrees = timed("degres") {
+      graph.inDegrees.join(graph.outDegrees).join(graph.vertices).map {
+        case (vid, ((in, out), (sid, name, city, zone))) => (sid, city, in, out)
+      }.collect().sortBy(_._1)
     }
-    println("\n== PageRank pondere par le nombre de trajets (30 iterations) ==")
-    val ranks = weightedPageRank(graph).join(graph.vertices)
-      .map { case (id, (rank, (name, city))) => (stationId(id), name, city, rank) }
-      .sortBy(-_._4)
-    ranks.collect().foreach { case (id, name, city, r) => println(f"$id $name%-16s $city%-11s $r%.4f") }
+    println("\n== Degres (voisins entrants / sortants) : 5 premieres stations ==")
+    degrees.take(5).foreach(println)
+
+    // --- PageRank
+    val pr = timed("PageRank non pondere (tol 1e-4)") { val r = graph.pageRank(0.0001).vertices.cache(); r.count(); r }
+    val wpr = timed("PageRank pondere (30 iterations)") { val r = weightedPageRank(graph).cache(); r.count(); r }
+    val ranks = wpr.join(pr).join(graph.vertices).map {
+      case (vid, ((w, u), (sid, name, city, zone))) => (sid, name, city, zone, w, u)
+    }.collect().sortBy(-_._5)
+    println("\n== PageRank pondere par le nombre de trajets : 10 premieres stations ==")
+    ranks.take(10).foreach { case (sid, name, city, zone, w, u) => println(f"$sid%-10s $city%-11s $zone%-16s pondere=$w%.3f non pondere=$u%.3f") }
 
     // --- Composantes connexes
-    println("\n== Composantes connexes ==")
-    val components = graph.connectedComponents().vertices.join(graph.vertices)
-      .map { case (id, (cc, (name, city))) => (cc, stationId(id), city) }
-    components.groupBy(_._1).sortByKey().collect().foreach { case (cc, members) =>
-      println(s"composante $cc : ${members.map(_._2).toSeq.sorted.mkString(", ")}")
+    val cc = timed("connectedComponents") { val r = graph.connectedComponents().vertices.cache(); r.count(); r }
+    val comps = cc.join(graph.vertices).map { case (vid, (c, (sid, _, city, _))) => (c, sid, city) }.collect()
+    println("\n== Composantes connexes (sous-reseaux isoles) ==")
+    comps.groupBy(_._1).toSeq.sortBy(-_._2.length).foreach { case (c, ms) =>
+      val cities = ms.map(_._3).distinct.mkString(", ")
+      println(s"composante $c : ${ms.length} stations (${cities})")
     }
 
-    // --- Plus courts chemins (en nombre de sauts) vers deux stations de reference
-    val landmarks = Seq(vertexId("S01"), vertexId("S10"))
-    println(s"\n== Plus courts chemins vers ${landmarks.map(stationId).mkString(", ")} (nb de sauts) ==")
-    ShortestPaths.run(graph, landmarks).vertices.sortByKey().collect().foreach { case (id, spMap) =>
-      println(s"${stationId(id)} -> " + landmarks.map(l => s"${stationId(l)}=${spMap.getOrElse(l, -1)}").mkString(", "))
+    // --- Plus courts chemins (nombre de sauts) vers la gare la plus connectee de Casablanca et de Marrakech
+    val deg = degrees.map(d => (d._1, d._3 + d._4)).toMap
+    val gares = graph.vertices.map { case (vid, (sid, _, city, zone)) => (sid, city, zone) }.collect()
+      .filter(g => g._3 == "gare" && Seq("Casablanca", "Marrakech").contains(g._2))
+    val landmarks = Seq("Casablanca", "Marrakech").map(c => gares.filter(_._2 == c).maxBy(g => deg.getOrElse(g._1, 0))._1)
+    val lmIds = landmarks.map(bId.value(_))
+    println(s"\n== Plus courts chemins (sauts) vers ${landmarks.mkString(", ")} ==")
+    val sp = timed("ShortestPaths") { ShortestPaths.run(graph, lmIds).vertices.collect().toMap }
+    val reach = lmIds.map(l => l -> sp.values.count(_.contains(l))).toMap
+    lmIds.zip(landmarks).foreach { case (l, name) =>
+      val hops = sp.values.flatMap(_.get(l)).toSeq
+      println(f"$name : ${reach(l)} stations atteignent cette gare, distance moyenne ${if (hops.isEmpty) 0.0 else hops.sum.toDouble / hops.length}%.2f sauts, maximum ${if (hops.isEmpty) 0 else hops.max}")
     }
 
-    // --- Export Parquet (comparaison avec GraphFrames)
-    val pagerankDf = ranks.map { case (id, name, city, r) => (id, name, city, r) }.toDF("id", "name", "city", "pagerank")
-    scala.util.Try {
-      if (useCsv) {
-        pagerankDf.coalesce(1).write.mode("overwrite").option("header", "true").csv(s"$dir/csv/graphx_pagerank")
-        println(s"\nExport CSV : $dir/csv/graphx_pagerank")
-      } else {
-        pagerankDf.coalesce(1).write.mode("overwrite").parquet(s"$dir/graphx_pagerank")
-        println(s"\nExport Parquet : $dir/graphx_pagerank")
+    // --- Ecriture dans gold/graph_analysis (schema commun : result_type, city, entity, value, detail)
+    val cityOf = graph.vertices.map { case (vid, (sid, _, city, _)) => (sid, city) }.collect().toMap
+    val compSize = comps.groupBy(_._1).map { case (c, ms) => (c, ms.length) }
+    val rows =
+      ranks.map { case (sid, _, city, zone, w, u) => ("pagerank_graphx", city, sid, w, s"""{"pagerank_non_pondere":$u,"zone_type":"$zone"}""") }.toSeq ++
+      degrees.map { case (sid, city, in, out) => ("degres_graphx", city, sid, (in + out).toDouble, s"""{"voisins_entrants":$in,"voisins_sortants":$out}""") }.toSeq ++
+      comps.map { case (c, sid, city) => ("composantes_graphx", city, sid, c.toDouble, s"""{"taille":${compSize(c)}}""") }.toSeq ++
+      sp.toSeq.flatMap { case (vid, m) =>
+        val sid = names(vid)
+        m.toSeq.map { case (l, hops) => ("plus_courts_chemins_graphx", cityOf(sid), s"$sid->${names(l)}", hops.toDouble, "{}") }
       }
-    }.recover { case e: Throwable =>
-      // Typique sous Windows sans winutils : l'ecriture Hadoop locale est impossible.
-      println(s"\nExport ignore (${e.getClass.getSimpleName}) : relancer sur Linux / cluster")
-    }
-
+    val out = rows.toDF("result_type", "city", "entity", "value", "detail")
+    out.write.mode("append").partitionBy("city", "result_type").parquet(s"$lake/gold/graph_analysis")
+    println(s"\nExport Parquet GraphX : $lake/gold/graph_analysis (${rows.length} lignes ajoutees)")
     spark.stop()
   }
 }

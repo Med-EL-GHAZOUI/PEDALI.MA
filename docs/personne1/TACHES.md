@@ -1,31 +1,18 @@
 # Personne 1 - Data Engineering
 
-Responsabilite : infrastructure, Kafka, Spark, streaming et stockage.
-Branche Git : `personne1`
+Responsabilite : infrastructure, Kafka, Spark, streaming et stockage. Rapports : `docs/rapport_jalon1.pdf`, `docs/rapport_jalon2.pdf`.
 
-## Partie 1 - Environnement
-- [x] Depot Git et organisation des dossiers
-- [x] docker-compose.yml : Kafka KRaft, topic `trips` (3 partitions)
-- [x] Spark Master + 2 Workers
-- [x] Verifier le lancement (`docker compose up`) : cluster OK, 2 Workers ALIVE (capture : `screenshots/p2_spark_master_2_workers.png`)
-- [x] Notebook `01_spark_setup.ipynb` : SparkSession (version, master, appName, defaultParallelism)
+## Jalon 1 (Parties 1 a 3)
+- [x] Depot, docker-compose (Kafka KRaft, topic `trips` 3 partitions, Spark Master + 2 Workers, MinIO + bucket `lake`, Jupyter) ; `tests/check_storage.sh` 7/7
+- [x] SparkSession (version, master, appName, defaultParallelism) : `notebooks/01_spark_setup.ipynb`
+- [x] RDD : CA par ville, duree moyenne par ville et type de vehicule, top 5 : `pipeline/rdd_analysis.py`, `notebooks/02_rdd.ipynb`
+- [x] DataFrames, SQL, UDF `trip_band`, Parquet `silver/trips_history` : `pipeline/df_analysis.py`, `notebooks/03_dataframes_sql.ipynb`
 
-## Partie 2 - RDD
-- [x] Chargement JSONL et calculs RDD : revenus par ville, duree moyenne, top 5 stations (identiques a la reference P2, voir `notebooks/02_rdd.ipynb`)
-
-## Partie 3 - SQL / DataFrames
-- [x] DataFrames, SQL, UDF, agregations (`notebooks/03_dataframes_sql.ipynb`)
-- [x] Export Parquet (`s3a://lake/export/parquet/`)
-
-## Partie 4 - Streaming
-- [x] `producer/producer.py` (cle = start_station_id, debit configurable)
-- [x] Lecture Kafka (Structured Streaming) + parsing JSON + sinks Parquet/console (`pipeline/kafka_stream.py`, `notebooks/04_streaming_kafka.ipynb`)
-- [x] Preuves : micro-batches du sink console (`reports/streaming_console_microbatches.txt`), `kafka-consumer-groups.sh --describe` (`reports/kafka_consumer_groups.txt`)
-
-## Partie 5 - Pipeline
-- [x] Ecritures Bronze et Silver, indicateurs Gold (Delta Lake) : `pipeline/medallion.py`
-- [x] Preuves des couches : `reports/minio_layers.txt`, DESCRIBE HISTORY Gold : `reports/delta_describe_history_gold.txt`
-- [x] Checkpoints + test arret/redemarrage : `tests/check_pipeline_restart.py`, sortie dans `reports/pipeline_restart_output.txt`
-
-## Partie 6 - Graphes
-- [x] GraphFrames (PySpark) branche sur Silver, avec le code de la Personne 2 (`pipeline/graph_on_silver.py`, `reports/graphframes_silver_output.txt`)
+## Jalon 2 (Parties 4 a 6)
+- [x] Partie 4 : lecture Kafka, `from_json`, console `append`, JSON bruts `bronze/trips_raw`, comptages `complete`, watermark : `pipeline/part4_streaming.py`
+- [x] Partie 5 : dedoublonnage + watermark, jointure stream-static, Silver Parquet (city, date), Gold Delta : `pipeline/medallion.py`
+- [x] Checkpoints et test d'arret / reprise (2 min de production pendant l'arret) : `tests/check_pipeline_restart.py`, `reports/pipeline_restart_output.txt`
+- [x] Preuves : `reports/pipeline_minio_layers.txt`, `pipeline_gold_evidence.txt` (DESCRIBE HISTORY), `kafka_consumer_groups.txt`
+- [x] GraphFrames sur la couche Silver : `graphframes/graph_analysis.py` (lit `silver/trips_clean`)
+- [ ] A rejouer avec le `producer.py` et le `stations.json` officiels de l'enseignant (ici reproduits d'apres le sujet)
+- [ ] Soutenance de 10 minutes : demonstration du streaming et des graphes

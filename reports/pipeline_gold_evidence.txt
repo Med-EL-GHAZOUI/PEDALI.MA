@@ -1,0 +1,107 @@
+== SILVER s3a://lake/silver/trips_clean : 48996 lignes, doublons (trip_id, status) = 0
+root
+ |-- start_station: string (nullable = true)
+ |-- trip_id: string (nullable = true)
+ |-- user_id: string (nullable = true)
+ |-- vehicle_id: string (nullable = true)
+ |-- vehicle_type: string (nullable = true)
+ |-- end_station: string (nullable = true)
+ |-- status: string (nullable = true)
+ |-- duration_s: integer (nullable = true)
+ |-- distance_km: double (nullable = true)
+ |-- battery_pct: integer (nullable = true)
+ |-- price_mad: double (nullable = true)
+ |-- event_time: timestamp (nullable = true)
+ |-- partition: integer (nullable = true)
+ |-- offset: long (nullable = true)
+ |-- kafka_ts: timestamp (nullable = true)
+ |-- district: string (nullable = true)
+ |-- zone_type: string (nullable = true)
+ |-- trip_band: string (nullable = true)
+ |-- city: string (nullable = true)
+ |-- date: date (nullable = true)
++----------+-----+
+|      city|count|
++----------+-----+
+|Casablanca|17426|
+| Marrakech|11896|
+|     Rabat| 9890|
+|    Tanger| 9784|
++----------+-----+
++----------+------+----------+-------------+---------------+----------+---------+-------------------+
+|trip_id   |status|city      |district     |zone_type      |duration_s|trip_band|event_time         |
++----------+------+----------+-------------+---------------+----------+---------+-------------------+
+|T-00007852|ENDED |Casablanca|Oasis        |centre_affaires|964       |moyen    |2026-11-12 06:34:16|
+|T-00006773|ENDED |Casablanca|Ain Sebaa    |universite     |1069      |moyen    |2026-11-12 06:34:37|
+|T-00001367|ENDED |Casablanca|Hay Hassani  |plage          |1611      |moyen    |2026-11-12 06:54:49|
+|T-00016166|ENDED |Casablanca|Roches Noires|residentiel    |1570      |moyen    |2026-11-12 07:24:34|
+|T-00008691|ENDED |Casablanca|Maarif       |centre_affaires|1024      |moyen    |2026-11-12 08:14:21|
++----------+------+----------+-------------+---------------+----------+---------+-------------------+
+only showing top 5 rows
+== GOLD kpi_city_10min (fenetre tumbling 10 min) : 12476 lignes
++-------------------+-------------------+----------+----------------+----------------+---------------+
+|window_start       |window_end         |city      |trajets_termines|chiffre_affaires|duree_moyenne_s|
++-------------------+-------------------+----------+----------------+----------------+---------------+
+|2026-10-17 00:10:00|2026-10-17 00:20:00|Casablanca|0               |NULL            |NULL           |
+|2026-10-17 00:20:00|2026-10-17 00:30:00|Tanger    |0               |NULL            |NULL           |
+|2026-10-17 00:30:00|2026-10-17 00:40:00|Casablanca|1               |18.13           |1297.0         |
+|2026-10-17 00:30:00|2026-10-17 00:40:00|Rabat     |0               |NULL            |NULL           |
+|2026-10-17 00:40:00|2026-10-17 00:50:00|Casablanca|0               |NULL            |NULL           |
+|2026-10-17 00:40:00|2026-10-17 00:50:00|Rabat     |1               |12.08           |778.0          |
++-------------------+-------------------+----------+----------------+----------------+---------------+
+only showing top 6 rows
+== GOLD rates_city_sliding (fenetre 10 min, pas 5 min) : 24980 lignes
++-------------------+-------------------+----------+----------+----------+---------------+
+|window_start       |window_end         |city      |evenements|taux_panne|taux_annulation|
++-------------------+-------------------+----------+----------+----------+---------------+
+|2026-10-17 00:10:00|2026-10-17 00:20:00|Casablanca|2         |0.0       |0.0            |
+|2026-10-17 00:15:00|2026-10-17 00:25:00|Casablanca|2         |0.0       |0.0            |
+|2026-10-17 00:20:00|2026-10-17 00:30:00|Tanger    |2         |0.0       |0.0            |
+|2026-10-17 00:25:00|2026-10-17 00:35:00|Rabat     |1         |0.0       |0.0            |
+|2026-10-17 00:25:00|2026-10-17 00:35:00|Tanger    |2         |0.0       |0.0            |
+|2026-10-17 00:30:00|2026-10-17 00:40:00|Casablanca|1         |0.0       |0.0            |
++-------------------+-------------------+----------+----------+----------+---------------+
+only showing top 6 rows
+== GOLD user_sessions (session, inactivite 5 min) : 31445 lignes
++-------+-------------------+-------------------+---------------+-----------------+
+|user_id|session_start      |session_end        |duree_session_s|trajets_enchaines|
++-------+-------------------+-------------------+---------------+-----------------+
+|U-04989|2026-10-17 00:15:40|2026-10-17 00:22:45|125            |1                |
+|U-02651|2026-10-17 00:25:39|2026-10-17 00:33:08|149            |1                |
+|U-28076|2026-10-17 00:33:55|2026-10-17 00:40:41|106            |1                |
+|U-04989|2026-10-17 00:39:22|2026-10-17 00:44:22|0              |0                |
+|U-01794|2026-10-17 00:44:23|2026-10-17 00:50:29|66             |1                |
+|U-28076|2026-10-17 00:48:39|2026-10-17 00:53:39|0              |0                |
++-------+-------------------+-------------------+---------------+-----------------+
+only showing top 6 rows
+== Gold tumbling : totaux par ville
++----------+----------------+----------------+
+|      city|trajets_termines|chiffre_affaires|
++----------+----------------+----------------+
+|Casablanca|            5267|        75416.89|
+| Marrakech|            3618|        51942.61|
+|     Rabat|            3031|        43473.12|
+|    Tanger|            2962|        42600.26|
++----------+----------------+----------------+
+== Sessions : repartition du nombre de trajets enchaines
++-----------------+-----+
+|trajets_enchaines|count|
++-----------------+-----+
+|                0|14725|
+|                1|16715|
+|                2|    5|
++-----------------+-----+
+== DESCRIBE HISTORY de la table Delta Gold kpi_city_10min
++-------+-------------------+----------------+----------------------------------------------------------------------+
+|version|          timestamp|       operation|                                                      operationMetrics|
++-------+-------------------+----------------+----------------------------------------------------------------------+
+|     55|2026-11-17 04:54:24|STREAMING UPDATE|{numRemovedFiles -> 0, numOutputRows -> 19, numOutputBytes -> 6052,...|
+|     54|2026-11-17 04:54:20|STREAMING UPDATE|{numRemovedFiles -> 0, numOutputRows -> 269, numOutputBytes -> 1147...|
+|     53|2026-11-17 04:54:14|STREAMING UPDATE|{numRemovedFiles -> 0, numOutputRows -> 295, numOutputBytes -> 1167...|
+|     52|2026-11-17 04:54:09|STREAMING UPDATE|{numRemovedFiles -> 0, numOutputRows -> 222, numOutputBytes -> 1028...|
+|     51|2026-11-17 04:54:03|STREAMING UPDATE|{numRemovedFiles -> 0, numOutputRows -> 254, numOutputBytes -> 1118...|
+|     50|2026-11-17 04:53:55|STREAMING UPDATE|{numRemovedFiles -> 0, numOutputRows -> 236, numOutputBytes -> 1057...|
+|     49|2026-11-17 04:53:50|STREAMING UPDATE|{numRemovedFiles -> 0, numOutputRows -> 206, numOutputBytes -> 1005...|
+|     48|2026-11-17 04:53:45|STREAMING UPDATE|{numRemovedFiles -> 0, numOutputRows -> 202, numOutputBytes -> 9862...|
++-------+-------------------+----------------+----------------------------------------------------------------------+
+only showing top 8 rows
