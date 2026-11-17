@@ -1,0 +1,13 @@
+id,name,city,voisins_sortants,voisins_entrants,departs,arrivees
+S01,Casa Port,Casablanca,3,3,2815,1036
+S02,Maarif,Casablanca,3,3,1063,1670
+S03,Ain Diab,Casablanca,3,3,1025,1625
+S04,Hay Hassani,Casablanca,3,3,1066,1638
+S05,Jemaa el-Fna,Marrakech,3,3,1512,1514
+S06,Majorelle,Marrakech,3,3,1458,1497
+S07,Menara,Marrakech,3,3,1485,1431
+S08,Gueliz,Marrakech,3,3,1029,1042
+S09,Agdal Rabat,Rabat,3,3,1075,1039
+S10,Hay Riad,Rabat,3,3,1938,2265
+S11,Rabat Ville,Rabat,3,3,2142,1894
+S12,Kasbah Oudayas,Rabat,3,3,1065,1022
