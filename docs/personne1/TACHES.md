@@ -18,8 +18,8 @@ Branche Git : `personne1`
 - [x] Export Parquet (`s3a://lake/export/parquet/`)
 
 ## Partie 4 - Streaming
-- [ ] `producer/producer.py`
-- [ ] Lecture Kafka (Structured Streaming) + parsing JSON + sinks
+- [x] `producer/producer.py` (cle = start_station_id, debit configurable)
+- [x] Lecture Kafka (Structured Streaming) + parsing JSON + sinks Parquet/console (`pipeline/kafka_stream.py`, `notebooks/04_streaming_kafka.ipynb`)
 
 ## Partie 5 - Pipeline
 - [ ] Ecritures Bronze et Silver, indicateurs Gold (Delta Lake)
