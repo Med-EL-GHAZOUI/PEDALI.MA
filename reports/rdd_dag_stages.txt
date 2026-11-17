@@ -1,0 +1,29 @@
+# Partie 2 : RDD sur le cluster (Python 3.11 sur Master/Workers/Jupyter) - lineage, jobs et stages
+lignes_brutes : 20100
+trajets_termines : 17673
+revenus_par_ville : {'Casablanca': 157812.0, 'Marrakech': 144175.5, 'Rabat': 163402.5}
+duree_moyenne_min : 17.56
+top5_stations : [('S01', 2815), ('S11', 2142), ('S10', 1938), ('S05', 1512), ('S07', 1485)]
+lineage : (2) PythonRDD[6] at RDD at PythonRDD.scala:53 [Memory Serialized 1x Replicated]
+ |       CachedPartitions: 2; MemorySize: 943.3 KiB; DiskSize: 0.0 B
+ |  MapPartitionsRDD[5] at mapPartitions at PythonRDD.scala:160 [Memory Serialized 1x Replicated]
+ |  ShuffledRDD[4] at partitionBy at NativeMethodAccessorImpl.java:0 [Memory Serialized 1x Replicated]
+ +-(2) PairwiseRDD[3] at reduceByKey at /home/jovyan/work/pipeline/rdd_analysis.py:28 [Memory Serialized 1x Replicated]
+    |  PythonRDD[2] at reduceByKey at /home/jovyan/work/pipeline/rdd_analysis.py:28 [Memory Serialized 1x Replicated]
+    |  file:///home/jovyan/work/data/trips_history.jsonl MapPartitionsRDD[1] at textFile at NativeMethodAccessorImpl.java:0 [Memory Serialized 1x Replicated]
+    |  file:///home/jovyan/work/data/trips_history.jsonl HadoopRDD[0] at textFile at NativeMethodAccessorImpl.java:0 [Memory Serialized 1x Replicated]
+=== JOBS ===
+job  3  SUCCEEDED  stages=[8]  tasks=2  count at /home/jovyan/work/pipeline/rdd_analysis.py:36
+job  2  SUCCEEDED  stages=[5, 6, 7]  tasks=6  takeOrdered at /home/jovyan/work/pipeline/rdd_analysis.py:35
+job  1  SUCCEEDED  stages=[3, 4]  tasks=4  reduce at /home/jovyan/work/pipeline/rdd_analysis.py:33
+job  0  SUCCEEDED  stages=[0, 1, 2]  tasks=6  collect at /home/jovyan/work/pipeline/rdd_analysis.py:32
+=== STAGES ===
+stage  0  COMPLETE  tasks=2/2  shuffleRead=0B shuffleWrite=1123336B  reduceByKey at /home/jovyan/work/pipeline/rdd_anal
+stage  1  COMPLETE  tasks=2/2  shuffleRead=1123336B shuffleWrite=390B  reduceByKey at /home/jovyan/work/pipeline/rdd_anal
+stage  2  COMPLETE  tasks=2/2  shuffleRead=390B shuffleWrite=0B  collect at /home/jovyan/work/pipeline/rdd_analysis
+stage  3  SKIPPED   tasks=0/2  shuffleRead=0B shuffleWrite=0B  reduceByKey at /home/jovyan/work/pipeline/rdd_anal
+stage  4  COMPLETE  tasks=2/2  shuffleRead=0B shuffleWrite=0B  reduce at /home/jovyan/work/pipeline/rdd_analysis.
+stage  5  SKIPPED   tasks=0/2  shuffleRead=0B shuffleWrite=0B  reduceByKey at /home/jovyan/work/pipeline/rdd_anal
+stage  6  COMPLETE  tasks=2/2  shuffleRead=0B shuffleWrite=469B  reduceByKey at /home/jovyan/work/pipeline/rdd_anal
+stage  7  COMPLETE  tasks=2/2  shuffleRead=469B shuffleWrite=0B  takeOrdered at /home/jovyan/work/pipeline/rdd_anal
+stage  8  COMPLETE  tasks=2/2  shuffleRead=0B shuffleWrite=0B  count at /home/jovyan/work/pipeline/rdd_analysis.p
