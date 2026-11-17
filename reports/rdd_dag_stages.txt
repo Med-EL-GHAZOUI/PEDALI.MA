@@ -1,29 +1,18 @@
-# Partie 2 : RDD sur le cluster (Python 3.11 sur Master/Workers/Jupyter) - lineage, jobs et stages
-lignes_brutes : 20100
-trajets_termines : 17673
-revenus_par_ville : {'Casablanca': 157812.0, 'Marrakech': 144175.5, 'Rabat': 163402.5}
-duree_moyenne_min : 17.56
-top5_stations : [('S01', 2815), ('S11', 2142), ('S10', 1938), ('S05', 1512), ('S07', 1485)]
-lineage : (2) PythonRDD[6] at RDD at PythonRDD.scala:53 [Memory Serialized 1x Replicated]
- |       CachedPartitions: 2; MemorySize: 943.3 KiB; DiskSize: 0.0 B
- |  MapPartitionsRDD[5] at mapPartitions at PythonRDD.scala:160 [Memory Serialized 1x Replicated]
- |  ShuffledRDD[4] at partitionBy at NativeMethodAccessorImpl.java:0 [Memory Serialized 1x Replicated]
- +-(2) PairwiseRDD[3] at reduceByKey at /home/jovyan/work/pipeline/rdd_analysis.py:28 [Memory Serialized 1x Replicated]
-    |  PythonRDD[2] at reduceByKey at /home/jovyan/work/pipeline/rdd_analysis.py:28 [Memory Serialized 1x Replicated]
-    |  file:///home/jovyan/work/data/trips_history.jsonl MapPartitionsRDD[1] at textFile at NativeMethodAccessorImpl.java:0 [Memory Serialized 1x Replicated]
-    |  file:///home/jovyan/work/data/trips_history.jsonl HadoopRDD[0] at textFile at NativeMethodAccessorImpl.java:0 [Memory Serialized 1x Replicated]
-=== JOBS ===
-job  3  SUCCEEDED  stages=[8]  tasks=2  count at /home/jovyan/work/pipeline/rdd_analysis.py:36
-job  2  SUCCEEDED  stages=[5, 6, 7]  tasks=6  takeOrdered at /home/jovyan/work/pipeline/rdd_analysis.py:35
-job  1  SUCCEEDED  stages=[3, 4]  tasks=4  reduce at /home/jovyan/work/pipeline/rdd_analysis.py:33
-job  0  SUCCEEDED  stages=[0, 1, 2]  tasks=6  collect at /home/jovyan/work/pipeline/rdd_analysis.py:32
-=== STAGES ===
-stage  0  COMPLETE  tasks=2/2  shuffleRead=0B shuffleWrite=1123336B  reduceByKey at /home/jovyan/work/pipeline/rdd_anal
-stage  1  COMPLETE  tasks=2/2  shuffleRead=1123336B shuffleWrite=390B  reduceByKey at /home/jovyan/work/pipeline/rdd_anal
-stage  2  COMPLETE  tasks=2/2  shuffleRead=390B shuffleWrite=0B  collect at /home/jovyan/work/pipeline/rdd_analysis
-stage  3  SKIPPED   tasks=0/2  shuffleRead=0B shuffleWrite=0B  reduceByKey at /home/jovyan/work/pipeline/rdd_anal
-stage  4  COMPLETE  tasks=2/2  shuffleRead=0B shuffleWrite=0B  reduce at /home/jovyan/work/pipeline/rdd_analysis.
-stage  5  SKIPPED   tasks=0/2  shuffleRead=0B shuffleWrite=0B  reduceByKey at /home/jovyan/work/pipeline/rdd_anal
-stage  6  COMPLETE  tasks=2/2  shuffleRead=0B shuffleWrite=469B  reduceByKey at /home/jovyan/work/pipeline/rdd_anal
-stage  7  COMPLETE  tasks=2/2  shuffleRead=469B shuffleWrite=0B  takeOrdered at /home/jovyan/work/pipeline/rdd_anal
-stage  8  COMPLETE  tasks=2/2  shuffleRead=0B shuffleWrite=0B  count at /home/jovyan/work/pipeline/rdd_analysis.p
+# Partie 2 : RDD sur le cluster (notebooks/02_rdd.ipynb) - lineage, jobs et stages
+
+(2) PythonRDD[8] at RDD at PythonRDD.scala:53 [Memory Serialized 1x Replicated]
+ |       CachedPartitions: 2; MemorySize: 1102.3 KiB; DiskSize: 0.0 B
+ |  MapPartitionsRDD[7] at mapPartitions at PythonRDD.scala:160 [Memory Serialized 1x Replicated]
+ |  ShuffledRDD[6] at partitionBy at NativeMethodAccessorImpl.java:0 [Memory Serialized 1x Replicated]
+ +-(2) PairwiseRDD[5] at reduceByKey at /tmp/ipykernel_14043/3594246375.py:1 [Memory Serialized 1x Replicated]
+    |  PythonRDD[4] at reduceByKey at /tmp/ipykernel_14043/3594246375.py:1 [Memory Serialized 1x Replicated]
+    |  s3a://lake/bronze/history/trips_history.jsonl MapPartitionsRDD[1] at textFile at NativeMethodAccessorImpl.java:0 [Memory Serialized 1x Replicated]
+    |  s3a://lake/bronze/history/trips_history.jsonl HadoopRDD[0] at textFile at NativeMethodAccessorImpl.java:0 [Memory Serialized 1x Replicated]
+
+job  0 SUCCEEDED stages=[0] taches=  2  count at /tmp/ipykernel_14043/2975042247.py:4
+job  1 SUCCEEDED stages=[1] taches=  1  runJob at PythonRDD.scala:181
+job  2 SUCCEEDED stages=[2, 3] taches=  4  count at /tmp/ipykernel_14043/3594246375.py:3
+job  3 SUCCEEDED stages=[4, 5] taches=  4  count at /tmp/ipykernel_14043/3594246375.py:3
+job  4 SUCCEEDED stages=[6, 7, 8] taches=  6  collect at /tmp/ipykernel_14043/391903125.py:1
+job  5 SUCCEEDED stages=[9, 10, 11] taches=  6  collectAsMap at /tmp/ipykernel_14043/3082896384.py:3
+job  6 SUCCEEDED stages=[12, 13, 14] taches=  6  takeOrdered at /tmp/ipykernel_14043/255431529.py:1

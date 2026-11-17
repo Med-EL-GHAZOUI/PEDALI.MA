@@ -1,0 +1,161 @@
+# Partie 3 : explain(True) sur la jointure trajets ENDED / stations, puis SortMergeJoin vs BroadcastHashJoin (notebooks/03b)
+
+== Parsed Logical Plan ==
+'Aggregate ['city, 'zone_type], ['city, 'zone_type, count(1) AS trajets#607L, round(sum('price_mad), 2) AS ca#609]
++- Project [start_station#20, trip_id#16, user_id#17, vehicle_id#18, vehicle_type#19, end_station#21, city#22, status#23, duration_s#24, distance_km#25, battery_pct#26, price_mad#27, event_time#28, zone_type#4]
+   +- Join Inner, (start_station#20 = start_station#574)
+      :- Filter (status#23 = ENDED)
+      :  +- Deduplicate [trip_id#16, status#23]
+      :     +- Relation [trip_id#16,user_id#17,vehicle_id#18,vehicle_type#19,start_station#20,end_station#21,city#22,status#23,duration_s#24,distance_km#25,battery_pct#26,price_mad#27,event_time#28] json
+      +- Project [station_id#0 AS start_station#574, zone_type#4]
+         +- Relation [station_id#0,name#1,city#2,district#3,zone_type#4,capacity#5,latitude#6,longitude#7] json
+
+== Analyzed Logical Plan ==
+city: string, zone_type: string, trajets: bigint, ca: double
+Aggregate [city#22, zone_type#4], [city#22, zone_type#4, count(1) AS trajets#607L, round(sum(price_mad#27), 2) AS ca#609]
++- Project [start_station#20, trip_id#16, user_id#17, vehicle_id#18, vehicle_type#19, end_station#21, city#22, status#23, duration_s#24, distance_km#25, battery_pct#26, price_mad#27, event_time#28, zone_type#4]
+   +- Join Inner, (start_station#20 = start_station#574)
+      :- Filter (status#23 = ENDED)
+      :  +- Deduplicate [trip_id#16, status#23]
+      :     +- Relation [trip_id#16,user_id#17,vehicle_id#18,vehicle_type#19,start_station#20,end_station#21,city#22,status#23,duration_s#24,distance_km#25,battery_pct#26,price_mad#27,event_time#28] json
+      +- Project [station_id#0 AS start_station#574, zone_type#4]
+         +- Relation [station_id#0,name#1,city#2,district#3,zone_type#4,capacity#5,latitude#6,longitude#7] json
+
+== Optimized Logical Plan ==
+Aggregate [city#22, zone_type#4], [city#22, zone_type#4, count(1) AS trajets#607L, round(sum(price_mad#27), 2) AS ca#609]
++- Project [city#22, price_mad#27, zone_type#4]
+   +- Join Inner, (start_station#20 = start_station#574)
+      :- Project [start_station#20, city#22, price_mad#27]
+      :  +- Filter isnotnull(start_station#20)
+      :     +- InMemoryRelation [trip_id#16, user_id#17, vehicle_id#18, vehicle_type#19, start_station#20, end_station#21, city#22, status#23, duration_s#24, distance_km#25, battery_pct#26, price_mad#27, event_time#28], StorageLevel(disk, memory, deserialized, 1 replicas)
+      :           +- AdaptiveSparkPlan isFinalPlan=true
+                     +- == Final Plan ==
+                        SortAggregate(key=[trip_id#16, status#23], functions=[first(user_id#17, false), first(vehicle_id#18, false), first(vehicle_type#19, false), first(start_station#20, false), first(end_station#21, false), first(city#22, false), first(duration_s#24, false), first(distance_km#25, false), first(battery_pct#26, false), first(price_mad#27, false), first(event_time#28, false)], output=[trip_id#16, user_id#44, vehicle_id#46, vehicle_type#48, start_station#50, end_station#52, city#54, status#23, duration_s#56, distance_km#58, battery_pct#60, price_mad#62, event_time#64])
+                        +- *(2) Sort [trip_id#16 ASC NULLS FIRST, status#23 ASC NULLS FIRST], false, 0
+                           +- ShuffleQueryStage 0
+                              +- Exchange hashpartitioning(trip_id#16, status#23, 8), ENSURE_REQUIREMENTS, [plan_id=58]
+                                 +- SortAggregate(key=[trip_id#16, status#23], functions=[partial_first(user_id#17, false), partial_first(vehicle_id#18, false), partial_first(vehicle_type#19, false), partial_first(start_station#20, false), partial_first(end_station#21, false), partial_first(city#22, false), partial_first(duration_s#24, false), partial_first(distance_km#25, false), partial_first(battery_pct#26, false), partial_first(price_mad#27, false), partial_first(event_time#28, false)], output=[trip_id#16, status#23, first#87, valueSet#88, first#89, valueSet#90, first#91, valueSet#92, first#93, valueSet#94, first#95, valueSet#96, first#97, valueSet#98, first#99, valueSet#100, first#101, valueSet#102, first#103, valueSet#104, first#105, valueSet#106, first#107, valueSet#108])
+                                    +- *(1) Sort [trip_id#16 ASC NULLS FIRST, status#23 ASC NULLS FIRST], false, 0
+                                       +- *(1) Filter (isnotnull(status#23) AND (status#23 = ENDED))
+                                          +- FileScan json [trip_id#16,user_id#17,vehicle_id#18,vehicle_type#19,start_station#20,end_station#21,city#22,status#23,duration_s#24,distance_km#25,battery_pct#26,price_mad#27,event_time#28] Batched: false, DataFilters: [isnotnull(status#23), (status#23 = ENDED)], Format: JSON, Location: InMemoryFileIndex(1 paths)[s3a://lake/bronze/history/trips_history.jsonl], PartitionFilters: [], PushedFilters: [IsNotNull(status), EqualTo(status,ENDED)], ReadSchema: struct<trip_id:string,user_id:string,vehicle_id:string,vehicle_type:string,start_station:string,e...
+                     +- == Initial Plan ==
+                        SortAggregate(key=[trip_id#16, status#23], functions=[first(user_id#17, false), first(vehicle_id#18, false), first(vehicle_type#19, false), first(start_station#20, false), first(end_station#21, false), first(city#22, false), first(duration_s#24, false), first(distance_km#25, false), first(battery_pct#26, false), first(price_mad#27, false), first(event_time#28, false)], output=[trip_id#16, user_id#44, vehicle_id#46, vehicle_type#48, start_station#50, end_station#52, city#54, status#23, duration_s#56, distance_km#58, battery_pct#60, price_mad#62, event_time#64])
+                        +- Sort [trip_id#16 ASC NULLS FIRST, status#23 ASC NULLS FIRST], false, 0
+                           +- Exchange hashpartitioning(trip_id#16, status#23, 8), ENSURE_REQUIREMENTS, [plan_id=20]
+                              +- SortAggregate(key=[trip_id#16, status#23], functions=[partial_first(user_id#17, false), partial_first(vehicle_id#18, false), partial_first(vehicle_type#19, false), partial_first(start_station#20, false), partial_first(end_station#21, false), partial_first(city#22, false), partial_first(duration_s#24, false), partial_first(distance_km#25, false), partial_first(battery_pct#26, false), partial_first(price_mad#27, false), partial_first(event_time#28, false)], output=[trip_id#16, status#23, first#87, valueSet#88, first#89, valueSet#90, first#91, valueSet#92, first#93, valueSet#94, first#95, valueSet#96, first#97, valueSet#98, first#99, valueSet#100, first#101, valueSet#102, first#103, valueSet#104, first#105, valueSet#106, first#107, valueSet#108])
+                                 +- Sort [trip_id#16 ASC NULLS FIRST, status#23 ASC NULLS FIRST], false, 0
+                                    +- Filter (isnotnull(status#23) AND (status#23 = ENDED))
+                                       +- FileScan json [trip_id#16,user_id#17,vehicle_id#18,vehicle_type#19,start_station#20,end_station#21,city#22,status#23,duration_s#24,distance_km#25,battery_pct#26,price_mad#27,event_time#28] Batched: false, DataFilters: [isnotnull(status#23), (status#23 = ENDED)], Format: JSON, Location: InMemoryFileIndex(1 paths)[s3a://lake/bronze/history/trips_history.jsonl], PartitionFilters: [], PushedFilters: [IsNotNull(status), EqualTo(status,ENDED)], ReadSchema: struct<trip_id:string,user_id:string,vehicle_id:string,vehicle_type:string,start_station:string,e...
+      +- Project [station_id#0 AS start_station#574, zone_type#4]
+         +- Filter isnotnull(station_id#0)
+            +- Relation [station_id#0,name#1,city#2,district#3,zone_type#4,capacity#5,latitude#6,longitude#7] json
+
+== Physical Plan ==
+AdaptiveSparkPlan isFinalPlan=false
++- HashAggregate(keys=[city#22, zone_type#4], functions=[count(1), sum(price_mad#27)], output=[city#22, zone_type#4, trajets#607L, ca#609])
+   +- Exchange hashpartitioning(city#22, zone_type#4, 8), ENSURE_REQUIREMENTS, [plan_id=136]
+      +- HashAggregate(keys=[city#22, zone_type#4], functions=[partial_count(1), partial_sum(price_mad#27)], output=[city#22, zone_type#4, count#811L, sum#812])
+         +- Project [city#22, price_mad#27, zone_type#4]
+            +- BroadcastHashJoin [start_station#20], [start_station#574], Inner, BuildRight, false
+               :- Filter isnotnull(start_station#20)
+               :  +- InMemoryTableScan [start_station#20, city#22, price_mad#27], [isnotnull(start_station#20)]
+               :        +- InMemoryRelation [trip_id#16, user_id#17, vehicle_id#18, vehicle_type#19, start_station#20, end_station#21, city#22, status#23, duration_s#24, distance_km#25, battery_pct#26, price_mad#27, event_time#28], StorageLevel(disk, memory, deserialized, 1 replicas)
+               :              +- AdaptiveSparkPlan isFinalPlan=true
+                                 +- == Final Plan ==
+                                    SortAggregate(key=[trip_id#16, status#23], functions=[first(user_id#17, false), first(vehicle_id#18, false), first(vehicle_type#19, false), first(start_station#20, false), first(end_station#21, false), first(city#22, false), first(duration_s#24, false), first(distance_km#25, false), first(battery_pct#26, false), first(price_mad#27, false), first(event_time#28, false)], output=[trip_id#16, user_id#44, vehicle_id#46, vehicle_type#48, start_station#50, end_station#52, city#54, status#23, duration_s#56, distance_km#58, battery_pct#60, price_mad#62, event_time#64])
+                                    +- *(2) Sort [trip_id#16 ASC NULLS FIRST, status#23 ASC NULLS FIRST], false, 0
+                                       +- ShuffleQueryStage 0
+                                          +- Exchange hashpartitioning(trip_id#16, status#23, 8), ENSURE_REQUIREMENTS, [plan_id=58]
+                                             +- SortAggregate(key=[trip_id#16, status#23], functions=[partial_first(user_id#17, false), partial_first(vehicle_id#18, false), partial_first(vehicle_type#19, false), partial_first(start_station#20, false), partial_first(end_station#21, false), partial_first(city#22, false), partial_first(duration_s#24, false), partial_first(distance_km#25, false), partial_first(battery_pct#26, false), partial_first(price_mad#27, false), partial_first(event_time#28, false)], output=[trip_id#16, status#23, first#87, valueSet#88, first#89, valueSet#90, first#91, valueSet#92, first#93, valueSet#94, first#95, valueSet#96, first#97, valueSet#98, first#99, valueSet#100, first#101, valueSet#102, first#103, valueSet#104, first#105, valueSet#106, first#107, valueSet#108])
+                                                +- *(1) Sort [trip_id#16 ASC NULLS FIRST, status#23 ASC NULLS FIRST], false, 0
+                                                   +- *(1) Filter (isnotnull(status#23) AND (status#23 = ENDED))
+                                                      +- FileScan json [trip_id#16,user_id#17,vehicle_id#18,vehicle_type#19,start_station#20,end_station#21,city#22,status#23,duration_s#24,distance_km#25,battery_pct#26,price_mad#27,event_time#28] Batched: false, DataFilters: [isnotnull(status#23), (status#23 = ENDED)], Format: JSON, Location: InMemoryFileIndex(1 paths)[s3a://lake/bronze/history/trips_history.jsonl], PartitionFilters: [], PushedFilters: [IsNotNull(status), EqualTo(status,ENDED)], ReadSchema: struct<trip_id:string,user_id:string,vehicle_id:string,vehicle_type:string,start_station:string,e...
+                                 +- == Initial Plan ==
+                                    SortAggregate(key=[trip_id#16, status#23], functions=[first(user_id#17, false), first(vehicle_id#18, false), first(vehicle_type#19, false), first(start_station#20, false), first(end_station#21, false), first(city#22, false), first(duration_s#24, false), first(distance_km#25, false), first(battery_pct#26, false), first(price_mad#27, false), first(event_time#28, false)], output=[trip_id#16, user_id#44, vehicle_id#46, vehicle_type#48, start_station#50, end_station#52, city#54, status#23, duration_s#56, distance_km#58, battery_pct#60, price_mad#62, event_time#64])
+                                    +- Sort [trip_id#16 ASC NULLS FIRST, status#23 ASC NULLS FIRST], false, 0
+                                       +- Exchange hashpartitioning(trip_id#16, status#23, 8), ENSURE_REQUIREMENTS, [plan_id=20]
+                                          +- SortAggregate(key=[trip_id#16, status#23], functions=[partial_first(user_id#17, false), partial_first(vehicle_id#18, false), partial_first(vehicle_type#19, false), partial_first(start_station#20, false), partial_first(end_station#21, false), partial_first(city#22, false), partial_first(duration_s#24, false), partial_first(distance_km#25, false), partial_first(battery_pct#26, false), partial_first(price_mad#27, false), partial_first(event_time#28, false)], output=[trip_id#16, status#23, first#87, valueSet#88, first#89, valueSet#90, first#91, valueSet#92, first#93, valueSet#94, first#95, valueSet#96, first#97, valueSet#98, first#99, valueSet#100, first#101, valueSet#102, first#103, valueSet#104, first#105, valueSet#106, first#107, valueSet#108])
+                                             +- Sort [trip_id#16 ASC NULLS FIRST, status#23 ASC NULLS FIRST], false, 0
+                                                +- Filter (isnotnull(status#23) AND (status#23 = ENDED))
+                                                   +- FileScan json [trip_id#16,user_id#17,vehicle_id#18,vehicle_type#19,start_station#20,end_station#21,city#22,status#23,duration_s#24,distance_km#25,battery_pct#26,price_mad#27,event_time#28] Batched: false, DataFilters: [isnotnull(status#23), (status#23 = ENDED)], Format: JSON, Location: InMemoryFileIndex(1 paths)[s3a://lake/bronze/history/trips_history.jsonl], PartitionFilters: [], PushedFilters: [IsNotNull(status), EqualTo(status,ENDED)], ReadSchema: struct<trip_id:string,user_id:string,vehicle_id:string,vehicle_type:string,start_station:string,e...
+               +- BroadcastExchange HashedRelationBroadcastMode(List(input[0, string, true]),false), [plan_id=131]
+                  +- Project [station_id#0 AS start_station#574, zone_type#4]
+                     +- Filter isnotnull(station_id#0)
+                        +- FileScan json [station_id#0,zone_type#4] Batched: false, DataFilters: [isnotnull(station_id#0)], Format: JSON, Location: InMemoryFileIndex(1 paths)[s3a://lake/bronze/history/stations.json], PartitionFilters: [], PushedFilters: [IsNotNull(station_id)], ReadSchema: struct<station_id:string,zone_type:string>
+
+
+
+--- seuil = -1 : SortMergeJoin attendu ---
+== Physical Plan ==
+AdaptiveSparkPlan isFinalPlan=false
++- HashAggregate(keys=[zone_type#4], functions=[count(1)])
+   +- Exchange hashpartitioning(zone_type#4, 8), ENSURE_REQUIREMENTS, [plan_id=176]
+      +- HashAggregate(keys=[zone_type#4], functions=[partial_count(1)])
+         +- Project [zone_type#4]
+            +- SortMergeJoin [start_station#20], [start_station#574], Inner
+               :- Sort [start_station#20 ASC NULLS FIRST], false, 0
+               :  +- Exchange hashpartitioning(start_station#20, 8), ENSURE_REQUIREMENTS, [plan_id=168]
+               :     +- Filter isnotnull(start_station#20)
+               :        +- InMemoryTableScan [start_station#20], [isnotnull(start_station#20)]
+               :              +- InMemoryRelation [trip_id#16, user_id#17, vehicle_id#18, vehicle_type#19, start_station#20, end_station#21, city#22, status#23, duration_s#24, distance_km#25, battery_pct#26, price_mad#27, event_time#28], StorageLevel(disk, memory, deserialized, 1 replicas)
+               :                    +- AdaptiveSparkPlan isFinalPlan=true
+                                       +- == Final Plan ==
+                                          SortAggregate(key=[trip_id#16, status#23], functions=[first(user_id#17, false), first(vehicle_id#18, false), first(vehicle_type#19, false), first(start_station#20, false), first(end_station#21, false), first(city#22, false), first(duration_s#24, false), first(distance_km#25, false), first(battery_pct#26, false), first(price_mad#27, false), first(event_time#28, false)])
+                                          +- *(2) Sort [trip_id#16 ASC NULLS FIRST, status#23 ASC NULLS FIRST], false, 0
+                                             +- ShuffleQueryStage 0
+                                                +- Exchange hashpartitioning(trip_id#16, status#23, 8), ENSURE_REQUIREMENTS, [plan_id=58]
+                                                   +- SortAggregate(key=[trip_id#16, status#23], functions=[partial_first(user_id#17, false), partial_first(vehicle_id#18, false), partial_first(vehicle_type#19, false), partial_first(start_station#20, false), partial_first(end_station#21, false), partial_first(city#22, false), partial_first(duration_s#24, false), partial_first(distance_km#25, false), partial_first(battery_pct#26, false), partial_first(price_mad#27, false), partial_first(event_time#28, false)])
+                                                      +- *(1) Sort [trip_id#16 ASC NULLS FIRST, status#23 ASC NULLS FIRST], false, 0
+                                                         +- *(1) Filter (isnotnull(status#23) AND (status#23 = ENDED))
+                                                            +- FileScan json [trip_id#16,user_id#17,vehicle_id#18,vehicle_type#19,start_station#20,end_station#21,city#22,status#23,duration_s#24,distance_km#25,battery_pct#26,price_mad#27,event_time#28] Batched: false, DataFilters: [isnotnull(status#23), (status#23 = ENDED)], Format: JSON, Location: InMemoryFileIndex(1 paths)[s3a://lake/bronze/history/trips_history.jsonl], PartitionFilters: [], PushedFilters: [IsNotNull(status), EqualTo(status,ENDED)], ReadSchema: struct<trip_id:string,user_id:string,vehicle_id:string,vehicle_type:string,start_station:string,e...
+                                       +- == Initial Plan ==
+                                          SortAggregate(key=[trip_id#16, status#23], functions=[first(user_id#17, false), first(vehicle_id#18, false), first(vehicle_type#19, false), first(start_station#20, false), first(end_station#21, false), first(city#22, false), first(duration_s#24, false), first(distance_km#25, false), first(battery_pct#26, false), first(price_mad#27, false), first(event_time#28, false)])
+                                          +- Sort [trip_id#16 ASC NULLS FIRST, status#23 ASC NULLS FIRST], false, 0
+                                             +- Exchange hashpartitioning(trip_id#16, status#23, 8), ENSURE_REQUIREMENTS, [plan_id=20]
+                                                +- SortAggregate(key=[trip_id#16, status#23], functions=[partial_first(user_id#17, false), partial_first(vehicle_id#18, false), partial_first(vehicle_type#19, false), partial_first(start_station#20, false), partial_first(end_station#21, false), partial_first(city#22, false), partial_first(duration_s#24, false), partial_first(distance_km#25, false), partial_first(battery_pct#26, false), partial_first(price_mad#27, false), partial_first(event_time#28, false)])
+                                                   +- Sort [trip_id#16 ASC NULLS FIRST, status#23 ASC NULLS FIRST], false, 0
+                                                      +- Filter (isnotnull(status#23) AND (status#23 = ENDED))
+                                                         +- FileScan json [trip_id#16,user_id#17,vehicle_id#18,vehicle_type#19,start_station#20,end_station#21,city#22,status#23,duration_s#24,distance_km#25,battery_pct#26,price_mad#27,event_time#28] Batched: false, DataFilters: [isnotnull(status#23), (status#23 = ENDED)], Format: JSON, Location: InMemoryFileIndex(1 paths)[s3a://lake/bronze/history/trips_history.jsonl], PartitionFilters: [], PushedFilters: [IsNotNull(status), EqualTo(status,ENDED)], ReadSchema: struct<trip_id:string,user_id:string,vehicle_id:string,vehicle_type:string,start_station:string,e...
+               +- Sort [start_station#574 ASC NULLS FIRST], false, 0
+                  +- Exchange hashpartitioning(start_station#574, 8), ENSURE_REQUIREMENTS, [plan_id=169]
+                     +- Project [station_id#0 AS start_station#574, zone_type#4]
+                        +- Filter isnotnull(station_id#0)
+                           +- FileScan json [station_id#0,zone_type#4] Batched: false, DataFilters: [isnotnull(station_id#0)], Format: JSON, Location: InMemoryFileIndex(1 paths)[s3a://lake/bronze/history/stations.json], PartitionFilters: [], PushedFilters: [IsNotNull(station_id)], ReadSchema: struct<station_id:string,zone_type:string>
+
+
+--- seuil = 10 Mo : BroadcastHashJoin attendu ---
+== Physical Plan ==
+AdaptiveSparkPlan isFinalPlan=false
++- HashAggregate(keys=[zone_type#4], functions=[count(1)])
+   +- Exchange hashpartitioning(zone_type#4, 8), ENSURE_REQUIREMENTS, [plan_id=212]
+      +- HashAggregate(keys=[zone_type#4], functions=[partial_count(1)])
+         +- Project [zone_type#4]
+            +- BroadcastHashJoin [start_station#20], [start_station#574], Inner, BuildRight, false
+               :- Filter isnotnull(start_station#20)
+               :  +- InMemoryTableScan [start_station#20], [isnotnull(start_station#20)]
+               :        +- InMemoryRelation [trip_id#16, user_id#17, vehicle_id#18, vehicle_type#19, start_station#20, end_station#21, city#22, status#23, duration_s#24, distance_km#25, battery_pct#26, price_mad#27, event_time#28], StorageLevel(disk, memory, deserialized, 1 replicas)
+               :              +- AdaptiveSparkPlan isFinalPlan=true
+                                 +- == Final Plan ==
+                                    SortAggregate(key=[trip_id#16, status#23], functions=[first(user_id#17, false), first(vehicle_id#18, false), first(vehicle_type#19, false), first(start_station#20, false), first(end_station#21, false), first(city#22, false), first(duration_s#24, false), first(distance_km#25, false), first(battery_pct#26, false), first(price_mad#27, false), first(event_time#28, false)])
+                                    +- *(2) Sort [trip_id#16 ASC NULLS FIRST, status#23 ASC NULLS FIRST], false, 0
+                                       +- ShuffleQueryStage 0
+                                          +- Exchange hashpartitioning(trip_id#16, status#23, 8), ENSURE_REQUIREMENTS, [plan_id=58]
+                                             +- SortAggregate(key=[trip_id#16, status#23], functions=[partial_first(user_id#17, false), partial_first(vehicle_id#18, false), partial_first(vehicle_type#19, false), partial_first(start_station#20, false), partial_first(end_station#21, false), partial_first(city#22, false), partial_first(duration_s#24, false), partial_first(distance_km#25, false), partial_first(battery_pct#26, false), partial_first(price_mad#27, false), partial_first(event_time#28, false)])
+                                                +- *(1) Sort [trip_id#16 ASC NULLS FIRST, status#23 ASC NULLS FIRST], false, 0
+                                                   +- *(1) Filter (isnotnull(status#23) AND (status#23 = ENDED))
+                                                      +- FileScan json [trip_id#16,user_id#17,vehicle_id#18,vehicle_type#19,start_station#20,end_station#21,city#22,status#23,duration_s#24,distance_km#25,battery_pct#26,price_mad#27,event_time#28] Batched: false, DataFilters: [isnotnull(status#23), (status#23 = ENDED)], Format: JSON, Location: InMemoryFileIndex(1 paths)[s3a://lake/bronze/history/trips_history.jsonl], PartitionFilters: [], PushedFilters: [IsNotNull(status), EqualTo(status,ENDED)], ReadSchema: struct<trip_id:string,user_id:string,vehicle_id:string,vehicle_type:string,start_station:string,e...
+                                 +- == Initial Plan ==
+                                    SortAggregate(key=[trip_id#16, status#23], functions=[first(user_id#17, false), first(vehicle_id#18, false), first(vehicle_type#19, false), first(start_station#20, false), first(end_station#21, false), first(city#22, false), first(duration_s#24, false), first(distance_km#25, false), first(battery_pct#26, false), first(price_mad#27, false), first(event_time#28, false)])
+                                    +- Sort [trip_id#16 ASC NULLS FIRST, status#23 ASC NULLS FIRST], false, 0
+                                       +- Exchange hashpartitioning(trip_id#16, status#23, 8), ENSURE_REQUIREMENTS, [plan_id=20]
+                                          +- SortAggregate(key=[trip_id#16, status#23], functions=[partial_first(user_id#17, false), partial_first(vehicle_id#18, false), partial_first(vehicle_type#19, false), partial_first(start_station#20, false), partial_first(end_station#21, false), partial_first(city#22, false), partial_first(duration_s#24, false), partial_first(distance_km#25, false), partial_first(battery_pct#26, false), partial_first(price_mad#27, false), partial_first(event_time#28, false)])
+                                             +- Sort [trip_id#16 ASC NULLS FIRST, status#23 ASC NULLS FIRST], false, 0
+                                                +- Filter (isnotnull(status#23) AND (status#23 = ENDED))
+                                                   +- FileScan json [trip_id#16,user_id#17,vehicle_id#18,vehicle_type#19,start_station#20,end_station#21,city#22,status#23,duration_s#24,distance_km#25,battery_pct#26,price_mad#27,event_time#28] Batched: false, DataFilters: [isnotnull(status#23), (status#23 = ENDED)], Format: JSON, Location: InMemoryFileIndex(1 paths)[s3a://lake/bronze/history/trips_history.jsonl], PartitionFilters: [], PushedFilters: [IsNotNull(status), EqualTo(status,ENDED)], ReadSchema: struct<trip_id:string,user_id:string,vehicle_id:string,vehicle_type:string,start_station:string,e...
+               +- BroadcastExchange HashedRelationBroadcastMode(List(input[0, string, true]),false), [plan_id=207]
+                  +- Project [station_id#0 AS start_station#574, zone_type#4]
+                     +- Filter isnotnull(station_id#0)
+                        +- FileScan json [station_id#0,zone_type#4] Batched: false, DataFilters: [isnotnull(station_id#0)], Format: JSON, Location: InMemoryFileIndex(1 paths)[s3a://lake/bronze/history/stations.json], PartitionFilters: [], PushedFilters: [IsNotNull(station_id)], ReadSchema: struct<station_id:string,zone_type:string>
+
+
+

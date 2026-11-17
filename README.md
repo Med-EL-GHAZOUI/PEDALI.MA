@@ -45,8 +45,20 @@ Interfaces : Spark Master http://localhost:8080 - Jupyter http://localhost:8888 
 - [Schema des donnees](docs/schema_donnees.md)
 - [Cluster : DAG, stages, RDD](docs/partie_cluster_dag.md)
 
+## Jalon 1 (Parties 1 a 3) - branche `jalon1`
+
+Donnees au format du sujet (voir [schema](docs/schema_donnees.md)) ; rapport : [docs/rapport_jalon1.pdf](docs/rapport_jalon1.pdf).
+
+```bash
+python data/generate_stations.py && python producer/producer.py --mode file --n 50000
+bash scripts/load_history.sh                       # historique -> s3a://lake/bronze/history/
+# notebooks a executer dans Jupyter (http://localhost:8888) : 01, 02, 02b, 03, 03b
+```
+
+
 ## Preuves (dossier `reports/`)
 
 | Livrable | Fichier |
 |---|---|
 | DAG / stages des RDD | `rdd_dag_stages.txt` |
+| Jalon 1 : explain(True), validation, resultats | `jalon1_*.txt`, `rdd_dag_stages.txt` |

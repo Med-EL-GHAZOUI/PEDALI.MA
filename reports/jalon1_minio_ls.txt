@@ -1,0 +1,12 @@
+# mc ls --recursive local/lake/ (couches de la Partie 3 : bronze/history et silver/trips_history partitionne par city)
+[2026-11-17 04:05:45 UTC]  77KiB STANDARD stations.json
+[2026-11-17 04:05:49 UTC]  15MiB STANDARD trips_history.jsonl
+[2026-11-17 04:09:28 UTC]     0B STANDARD _SUCCESS
+[2026-11-17 04:09:27 UTC] 191KiB STANDARD city=Casablanca/part-00000-a075549f-663c-406d-9f7e-73c941a56eeb.c000.snappy.parquet
+[2026-11-17 04:09:28 UTC] 285KiB STANDARD city=Casablanca/part-00001-a075549f-663c-406d-9f7e-73c941a56eeb.c000.snappy.parquet
+[2026-11-17 04:09:28 UTC] 134KiB STANDARD city=Marrakech/part-00000-a075549f-663c-406d-9f7e-73c941a56eeb.c000.snappy.parquet
+[2026-11-17 04:09:28 UTC] 200KiB STANDARD city=Marrakech/part-00001-a075549f-663c-406d-9f7e-73c941a56eeb.c000.snappy.parquet
+[2026-11-17 04:09:28 UTC] 114KiB STANDARD city=Rabat/part-00000-a075549f-663c-406d-9f7e-73c941a56eeb.c000.snappy.parquet
+[2026-11-17 04:09:28 UTC] 168KiB STANDARD city=Rabat/part-00001-a075549f-663c-406d-9f7e-73c941a56eeb.c000.snappy.parquet
+[2026-11-17 04:09:28 UTC] 111KiB STANDARD city=Tanger/part-00000-a075549f-663c-406d-9f7e-73c941a56eeb.c000.snappy.parquet
+[2026-11-17 04:09:28 UTC] 168KiB STANDARD city=Tanger/part-00001-a075549f-663c-406d-9f7e-73c941a56eeb.c000.snappy.parquet

@@ -1,7 +1,7 @@
-"""Controle qualite independant (Personne 2) de trips_history.jsonl et stations.json.
+"""Controle qualite independant de trips_history.jsonl et stations.json, en Python pur (sans Spark).
 
-Sert aussi de reference pour valider les resultats RDD / DataFrames (Parties 2 et 3) :
-il calcule en Python pur revenus par ville, duree moyenne et top 5 des stations.
+Sert de REFERENCE pour valider les resultats RDD / DataFrames (Parties 2 et 3) :
+chiffre d'affaires par ville, duree moyenne par ville et type de vehicule, top 5 des stations de depart.
 
 Usage : python data/validate_data.py
 """
@@ -10,36 +10,38 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 D = Path(__file__).parent
-stations = {s["station_id"]: s for s in json.loads((D / "stations.json").read_text(encoding="utf8"))}
-trips = [json.loads(l) for l in (D / "trips_history.jsonl").read_text(encoding="utf8").splitlines() if l.strip()]
 
-ids = Counter(t["trip_id"] for t in trips)
-dup_ids = {k for k, v in ids.items() if v > 1}
-rules = {
-    "doublons (trip_id repete)": sum(1 for t in trips if t["trip_id"] in dup_ids),
-    "user_id manquant": sum(1 for t in trips if not t["user_id"]),
-    "station de depart inconnue": sum(1 for t in trips if t["start_station_id"] not in stations),
-    "duree negative": sum(1 for t in trips if t["duration_min"] is not None and t["duration_min"] < 0),
-    "trajet termine sans end_time": sum(1 for t in trips if t["status"] == "completed" and not t["end_time"]),
-}
-print(f"{len(trips)} lignes, {len(stations)} stations, {len(dup_ids)} trip_id dupliques")
-for k, v in rules.items():
-    print(f"  [{'OK' if v == 0 else '!!'}] {k}: {v}")
 
-seen, clean = set(), []
-for t in trips:
-    if t["trip_id"] in seen or not t["user_id"] or t["start_station_id"] not in stations:
-        continue
-    if t["duration_min"] is not None and t["duration_min"] < 0:
-        continue
-    seen.add(t["trip_id"])
-    if t["status"] == "completed":
-        clean.append(t)
+def reference(trips_path=D / "trips_history.jsonl", stations_path=D / "stations.json") -> dict:
+    stations = {s["station_id"]: s for s in json.loads(Path(stations_path).read_text(encoding="utf8"))}
+    events = [json.loads(l) for l in Path(trips_path).read_text(encoding="utf8").splitlines() if l.strip()]
 
-rev = defaultdict(float)
-for t in clean:
-    rev[t["city"]] += t["price_mad"]
-print(f"\nReference apres nettoyage ({len(clean)} trajets termines)")
-print("Revenus par ville :", {k: round(v, 2) for k, v in sorted(rev.items())})
-print("Duree moyenne (min):", round(sum(t["duration_min"] for t in clean) / len(clean), 2))
-print("Top 5 stations de depart:", Counter(t["start_station_id"] for t in clean).most_common(5))
+    seen, clean = set(), []
+    for e in events:                                   # dedoublonnage sur (trip_id, status)
+        key = (e["trip_id"], e["status"])
+        if key not in seen:
+            seen.add(key)
+            clean.append(e)
+    ended = [e for e in clean if e["status"] == "ENDED"]
+
+    revenue = defaultdict(float)
+    dur = defaultdict(lambda: [0, 0])
+    for e in ended:
+        revenue[e["city"]] += e["price_mad"]
+        s = dur[(e["city"], e["vehicle_type"])]
+        s[0] += e["duration_s"]
+        s[1] += 1
+    return {
+        "evenements": len(events), "doublons": len(events) - len(clean), "stations": len(stations),
+        "statuts": dict(Counter(e["status"] for e in clean)),
+        "trajets_termines": len(ended),
+        "chiffre_affaires_par_ville": {k: round(v, 2) for k, v in sorted(revenue.items())},
+        "duree_moyenne_s_par_ville_type": {f"{c}/{t}": round(v[0] / v[1], 1) for (c, t), v in sorted(dur.items())},
+        "top5_stations_depart": sorted(Counter(e["start_station"] for e in ended).items(), key=lambda kv: (-kv[1], kv[0]))[:5],
+        "inconnues": sum(1 for e in events if e["start_station"] not in stations),
+    }
+
+
+if __name__ == "__main__":
+    for k, v in reference().items():
+        print(f"{k}: {v}")
