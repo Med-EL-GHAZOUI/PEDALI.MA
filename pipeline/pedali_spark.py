@@ -40,7 +40,7 @@ def get_spark(app_name: str, delta: bool = False, **extra_conf) -> SparkSession:
         builder = (builder
                    .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
                    .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog"))
-    builder = builder.config("spark.sql.shuffle.partitions", "8")
+    builder = builder.config("spark.sql.shuffle.partitions", "8").config("spark.sql.session.timeZone", "UTC")
     for key, value in extra_conf.items():
         builder = builder.config(key.replace("__", "."), value)
     return builder.getOrCreate()

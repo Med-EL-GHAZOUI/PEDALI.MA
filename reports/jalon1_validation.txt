@@ -1,0 +1,37 @@
+# Validation : Python pur == RDD == DataFrame (notebooks/02b)
+
+evenements : 50000
+doublons : 1003
+stations : 400
+statuts : {'RESERVED': 16729, 'UNLOCKED': 15542, 'ENDED': 14880, 'CANCELLED': 1188, 'FAULT_REPORTED': 658}
+trajets_termines : 14880
+chiffre_affaires_par_ville : {'Casablanca': 75430.27, 'Marrakech': 51959.36, 'Rabat': 43473.12, 'Tanger': 42600.26}
+duree_moyenne_s_par_ville_type : {'Casablanca/BIKE': 1089.1, 'Casablanca/EBIKE': 1096.3, 'Casablanca/SCOOTER': 1089.7, 'Marrakech/BIKE': 1093.5, 'Marrakech/EBIKE': 1114.3, 'Marrakech/SCOOTER': 1099.1, 'Rabat/BIKE': 1089.2, 'Rabat/EBIKE': 1098.0, 'Rabat/SCOOTER': 1088.8, 'Tanger/BIKE': 1088.3, 'Tanger/EBIKE': 1108.1, 'Tanger/SCOOTER': 1100.3}
+top5_stations_depart : [('S-CAS-005', 343), ('S-CAS-097', 93), ('S-CAS-096', 87), ('S-MAR-007', 87), ('S-CAS-084', 85)]
+inconnues : 0
+
+root
+ |-- trip_id: string (nullable = true)
+ |-- user_id: string (nullable = true)
+ |-- vehicle_id: string (nullable = true)
+ |-- vehicle_type: string (nullable = true)
+ |-- start_station: string (nullable = true)
+ |-- end_station: string (nullable = true)
+ |-- city: string (nullable = true)
+ |-- status: string (nullable = true)
+ |-- duration_s: integer (nullable = true)
+ |-- distance_km: double (nullable = true)
+ |-- battery_pct: integer (nullable = true)
+ |-- price_mad: double (nullable = true)
+ |-- event_time: timestamp (nullable = true)
+
+evenements                                 50000
+doublons (meme trip_id + meme statut)      1003
+station de depart inconnue                 0
+ENDED sans duree/prix                      0
+champs ENDED renseignes hors ENDED         0
+duree negative                             0
+
+OK : Python pur == RDD == DataFrame (CA par ville, duree moyenne par ville/type, top 5, nombre de trajets)
+CA par ville : {'Casablanca': 75430.27, 'Marrakech': 51959.36, 'Rabat': 43473.12, 'Tanger': 42600.26}
+Top 5       : [('S-CAS-005', 343), ('S-CAS-097', 93), ('S-CAS-096', 87), ('S-MAR-007', 87), ('S-CAS-084', 85)]
