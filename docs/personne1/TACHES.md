@@ -7,23 +7,25 @@ Branche Git : `personne1`
 - [x] Depot Git et organisation des dossiers
 - [x] docker-compose.yml : Kafka KRaft, topic `trips` (3 partitions)
 - [x] Spark Master + 2 Workers
-- [ ] Verifier le lancement (`docker compose up`) + capture Spark Master avec 2 Workers
-- [ ] Notebook `01_spark_setup.ipynb` : SparkSession (version, master, appName, defaultParallelism)
+- [x] Verifier le lancement (`docker compose up`) : cluster OK, 2 Workers ALIVE (capture : `screenshots/p2_spark_master_2_workers.png`)
+- [x] Notebook `01_spark_setup.ipynb` : SparkSession (version, master, appName, defaultParallelism)
 
 ## Partie 2 - RDD
-- [ ] Chargement JSONL et calculs RDD : revenus par ville, duree moyenne, top 5 stations
+- [x] Chargement JSONL et calculs RDD : revenus par ville, duree moyenne, top 5 stations (identiques a la reference P2, voir `notebooks/02_rdd.ipynb`)
 
 ## Partie 3 - SQL / DataFrames
-- [ ] DataFrames, SQL, UDF, agregations
-- [ ] Export Parquet
+- [x] DataFrames, SQL, UDF, agregations (`notebooks/03_dataframes_sql.ipynb`)
+- [x] Export Parquet (`s3a://lake/export/parquet/`)
 
 ## Partie 4 - Streaming
-- [ ] `producer/producer.py`
-- [ ] Lecture Kafka (Structured Streaming) + parsing JSON + sinks
+- [x] `producer/producer.py` (cle = start_station_id, debit configurable)
+- [x] Lecture Kafka (Structured Streaming) + parsing JSON + sinks Parquet/console (`pipeline/kafka_stream.py`, `notebooks/04_streaming_kafka.ipynb`)
+- [x] Preuves : micro-batches du sink console (`reports/streaming_console_microbatches.txt`), `kafka-consumer-groups.sh --describe` (`reports/kafka_consumer_groups.txt`)
 
 ## Partie 5 - Pipeline
-- [ ] Ecritures Bronze et Silver, indicateurs Gold (Delta Lake)
-- [ ] Checkpoints + test arret/redemarrage
+- [x] Ecritures Bronze et Silver, indicateurs Gold (Delta Lake) : `pipeline/medallion.py`
+- [x] Preuves des couches : `reports/minio_layers.txt`, DESCRIBE HISTORY Gold : `reports/delta_describe_history_gold.txt`
+- [x] Checkpoints + test arret/redemarrage : `tests/check_pipeline_restart.py`, sortie dans `reports/pipeline_restart_output.txt`
 
 ## Partie 6 - Graphes
-- [ ] GraphFrames (PySpark), avec la Personne 2
+- [x] GraphFrames (PySpark) branche sur Silver, avec le code de la Personne 2 (`pipeline/graph_on_silver.py`, `reports/graphframes_silver_output.txt`)

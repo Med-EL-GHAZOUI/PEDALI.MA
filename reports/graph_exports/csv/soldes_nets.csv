@@ -1,0 +1,13 @@
+id,solde_net,name,city,capacity,role
+S01,-1779,Casa Port,Casablanca,20,SOURCE (se vide)
+S11,-248,Rabat Ville,Rabat,30,SOURCE (se vide)
+S07,-54,Menara,Marrakech,20,equilibree
+S12,-43,Kasbah Oudayas,Rabat,15,equilibree
+S09,-36,Agdal Rabat,Rabat,20,equilibree
+S05,2,Jemaa el-Fna,Marrakech,30,equilibree
+S08,13,Gueliz,Marrakech,25,equilibree
+S06,39,Majorelle,Marrakech,20,equilibree
+S10,327,Hay Riad,Rabat,20,PUITS (sature)
+S04,572,Hay Hassani,Casablanca,15,PUITS (sature)
+S03,600,Ain Diab,Casablanca,30,PUITS (sature)
+S02,607,Maarif,Casablanca,25,PUITS (sature)
