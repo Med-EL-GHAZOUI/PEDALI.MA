@@ -22,8 +22,8 @@ Branche Git : `personne1`
 - [x] Lecture Kafka (Structured Streaming) + parsing JSON + sinks Parquet/console (`pipeline/kafka_stream.py`, `notebooks/04_streaming_kafka.ipynb`)
 
 ## Partie 5 - Pipeline
-- [ ] Ecritures Bronze et Silver, indicateurs Gold (Delta Lake)
-- [ ] Checkpoints + test arret/redemarrage
+- [x] Ecritures Bronze et Silver, indicateurs Gold (Delta Lake) : `pipeline/medallion.py`
+- [x] Checkpoints + test arret/redemarrage : `tests/check_pipeline_restart.py`, sortie dans `reports/pipeline_restart_output.txt`
 
 ## Partie 6 - Graphes
 - [ ] GraphFrames (PySpark), avec la Personne 2
