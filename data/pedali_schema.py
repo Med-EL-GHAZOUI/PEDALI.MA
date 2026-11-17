@@ -1,34 +1,38 @@
-"""Schemas Spark explicites (Personne 2) + regles de qualite en DataFrame.
+"""Schemas Spark explicites (sans inference) + regles de qualite, format du sujet Pedali.ma.
 
 Importable depuis un notebook : sys.path.append("../data"); from pedali_schema import *
 Voir docs/schema_donnees.md pour la description des champs.
 """
-from pyspark.sql import DataFrame, SparkSession, Window
+from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql import functions as F
-from pyspark.sql.types import (DoubleType, IntegerType, StringType, StructField,
-                               StructType, TimestampType)
+from pyspark.sql.types import DoubleType, IntegerType, StringType, StructField, StructType, TimestampType
 
+# Un evenement JSON par changement d'etat d'un trajet.
 TRIPS_SCHEMA = StructType([
     StructField("trip_id", StringType(), False),
-    StructField("user_id", StringType(), True),   # nullable a la lecture : les nulls sont une anomalie a filtrer
-    StructField("bike_id", StringType(), False),
-    StructField("start_station_id", StringType(), False),
-    StructField("end_station_id", StringType(), True),
+    StructField("user_id", StringType(), False),
+    StructField("vehicle_id", StringType(), False),
+    StructField("vehicle_type", StringType(), False),     # BIKE | EBIKE | SCOOTER
+    StructField("start_station", StringType(), False),
+    StructField("end_station", StringType(), True),       # renseigne seulement pour ENDED
     StructField("city", StringType(), False),
-    StructField("start_time", TimestampType(), False),
-    StructField("end_time", TimestampType(), True),
-    StructField("duration_min", IntegerType(), True),
-    StructField("price_mad", DoubleType(), False),
-    StructField("status", StringType(), False),
+    StructField("status", StringType(), False),           # RESERVED | UNLOCKED | ENDED | CANCELLED | FAULT_REPORTED
+    StructField("duration_s", IntegerType(), True),       # ENDED seulement
+    StructField("distance_km", DoubleType(), True),       # ENDED seulement
+    StructField("battery_pct", IntegerType(), True),      # null pour BIKE
+    StructField("price_mad", DoubleType(), True),         # ENDED seulement
+    StructField("event_time", TimestampType(), False),    # ISO 8601 UTC ("...Z")
 ])
 
 STATIONS_SCHEMA = StructType([
     StructField("station_id", StringType(), False),
     StructField("name", StringType(), False),
     StructField("city", StringType(), False),
-    StructField("lat", DoubleType(), False),
-    StructField("lon", DoubleType(), False),
-    StructField("capacity", IntegerType(), False),
+    StructField("district", StringType(), False),         # quartier
+    StructField("zone_type", StringType(), False),        # gare, universite, plage, centre_affaires, residentiel, tourisme, commercial
+    StructField("capacity", IntegerType(), False),        # nombre de bornes
+    StructField("latitude", DoubleType(), False),
+    StructField("longitude", DoubleType(), False),
 ])
 
 
@@ -40,26 +44,21 @@ def read_stations(spark: SparkSession, path: str) -> DataFrame:
     return spark.read.schema(STATIONS_SCHEMA).option("multiLine", True).json(path)
 
 
-def clean_trips(trips: DataFrame, stations: DataFrame) -> DataFrame:
-    """Regles de qualite : user_id non null, duree >= 0, station de depart connue, trip_id unique."""
-    known = stations.select(F.col("station_id").alias("start_station_id"))
-    return (trips
-            .filter(F.col("user_id").isNotNull())
-            .filter(F.col("duration_min").isNull() | (F.col("duration_min") >= 0))
-            .join(known, "start_station_id", "left_semi")
-            .dropDuplicates(["trip_id"]))
+def clean_trips(trips: DataFrame, stations: DataFrame = None) -> DataFrame:
+    """Un evenement = (trip_id, status) : les re-emissions at-least-once (doublons) sont supprimees."""
+    return trips.dropDuplicates(["trip_id", "status"])
 
 
 def quality_report(trips: DataFrame, stations: DataFrame) -> dict:
     """Nombre de lignes en violation, pour chaque regle."""
-    known_ids = [r[0] for r in stations.select("station_id").collect()]
-    dup = (trips.groupBy("trip_id").count().filter("count > 1")
-           .agg(F.coalesce(F.sum("count"), F.lit(0))).first()[0])
+    known = [r[0] for r in stations.select("station_id").collect()]
+    total = trips.count()
+    distinct = trips.dropDuplicates(["trip_id", "status"]).count()
     return {
-        "lignes": trips.count(),
-        "doublons (trip_id repete)": dup,
-        "user_id manquant": trips.filter(F.col("user_id").isNull()).count(),
-        "station de depart inconnue": trips.filter(~F.col("start_station_id").isin(known_ids)).count(),
-        "duree negative": trips.filter(F.col("duration_min") < 0).count(),
-        "termine sans end_time": trips.filter((F.col("status") == "completed") & F.col("end_time").isNull()).count(),
+        "evenements": total,
+        "doublons (meme trip_id + meme statut)": total - distinct,
+        "station de depart inconnue": trips.filter(~F.col("start_station").isin(known)).count(),
+        "ENDED sans duree/prix": trips.filter((F.col("status") == "ENDED") & (F.col("duration_s").isNull() | F.col("price_mad").isNull())).count(),
+        "champs ENDED renseignes hors ENDED": trips.filter((F.col("status") != "ENDED") & F.col("end_station").isNotNull()).count(),
+        "duree negative": trips.filter(F.col("duration_s") < 0).count(),
     }

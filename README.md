@@ -51,6 +51,19 @@ Interfaces : Spark Master http://localhost:8080 - Jupyter http://localhost:8888 
 - [Partie 6 - Graphes](docs/partie6_graphes.md)
 - [Rapport de projet (PDF, 5 pages)](docs/rapport_pedali.pdf)
 
+## Jalon 1 (Parties 1 a 3) - branche `jalon1`
+
+Donnees au format du sujet (voir [schema](docs/schema_donnees.md)) ; rapport : [docs/rapport_jalon1.pdf](docs/rapport_jalon1.pdf).
+
+```bash
+python data/generate_stations.py && python producer/producer.py --mode file --n 50000
+bash scripts/load_history.sh                       # historique -> s3a://lake/bronze/history/
+# notebooks a executer dans Jupyter (http://localhost:8888) : 01, 02, 02b, 03, 03b
+```
+
+> Les Parties 4 a 6 (streaming, pipeline Delta, graphes) ci-dessous ont ete ecrites pour l'ancien schema de donnees
+> (`start_station_id`, `completed`...) : elles sont a porter sur le schema du sujet pour le jalon 2.
+
 ## Preuves (dossier `reports/`)
 
 | Livrable | Fichier |
@@ -60,4 +73,5 @@ Interfaces : Spark Master http://localhost:8080 - Jupyter http://localhost:8888 
 | `kafka-consumer-groups.sh --describe` | `kafka_consumer_groups.txt` |
 | Sink console et micro-batches | `streaming_console_microbatches.txt` |
 | DAG / stages des RDD | `rdd_dag_stages.txt` |
-| Test arret/redemarrage du pipeline | `pipeline_restart_output.txt` |
+| Test arret/redemarrage du pipeline (ancien schema) | `pipeline_restart_output.txt` |
+| Jalon 1 : explain(True), validation, resultats | `jalon1_*.txt`, `rdd_dag_stages.txt` |
