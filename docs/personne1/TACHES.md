@@ -26,4 +26,4 @@ Branche Git : `personne1`
 - [x] Checkpoints + test arret/redemarrage : `tests/check_pipeline_restart.py`, sortie dans `reports/pipeline_restart_output.txt`
 
 ## Partie 6 - Graphes
-- [ ] GraphFrames (PySpark), avec la Personne 2
+- [x] GraphFrames (PySpark) branche sur Silver, avec le code de la Personne 2 (`pipeline/graph_on_silver.py`, `reports/graphframes_silver_output.txt`)
