@@ -1,58 +1,77 @@
-"""Visualisation du reseau de stations (Personne 2).
+"""Partie 6 : representation visuelle du reseau d'une ville.
 
-Une carte par ville : position = lat/lon, epaisseur de l'arete = nombre de trajets,
-taille du noeud = capacite, couleur = solde net (rouge = se vide, bleu = se remplit).
+Taille des sommets proportionnelle au PageRank (GraphX, pondere par les trajets), epaisseur des aretes proportionnelle
+au nombre de trajets, couleur des sommets = solde net journalier (rouge : la station se vide, bleu : elle sature).
+Les stations a reequilibrer (recommandations) sont entourees et annotees.
 
-Usage : python graphframes/plot_network.py   (apres graph_analysis.py ; pandas + matplotlib requis)
-Sortie : screenshots/reseau_stations.png
+Usage (Jupyter) : python graphframes/plot_network.py [Marrakech Casablanca ...]
+Sortie : reports/graph_exports/reseau_<ville>.png
 """
+import json
+import sys
 from pathlib import Path
 
+sys.path.insert(0, "/home/jovyan/work/pipeline")
 import matplotlib
-
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import pandas as pd
-from matplotlib.patches import FancyArrowPatch
+from matplotlib.lines import Line2D
+from pedali_spark import get_spark
+from pyspark.sql import functions as F
 
-ROOT = Path(__file__).resolve().parent.parent
-CSV = ROOT / "reports/graph_exports/csv"
+LAKE = "s3a://lake"
+OUT = Path("/home/jovyan/work/reports/graph_exports")
 
-stations = pd.read_csv(CSV / "sommets.csv").set_index("id")
-edges = pd.read_csv(CSV / "aretes.csv")
-balance = pd.read_csv(CSV / "soldes_nets.csv").set_index("id")["solde_net"]
-stations["solde"] = balance
-vmax = balance.abs().max()
 
-cities = sorted(stations.city.unique())
-fig, axes = plt.subplots(1, len(cities), figsize=(6 * len(cities), 5.5))
-max_trips = edges.trajets.max()
+def plot_city(city: str, vertices, edges, analysis, min_trips: int):
+    v = vertices[vertices.city == city].set_index("id")
+    e = edges[(edges.src.isin(v.index)) & (edges.trajets >= min_trips)]
+    pr = analysis[(analysis.result_type == "pagerank_graphx") & (analysis.city == city)].set_index("entity")["value"]
+    bal = analysis[(analysis.result_type == "soldes_nets") & (analysis.city == city)].set_index("entity")["value"]
+    rec = analysis[(analysis.result_type == "recommandations") & (analysis.city == city)]
 
-for ax, city in zip(axes, cities):
-    st = stations[stations.city == city]
-    ax.set_title(city, fontsize=14, weight="bold")
-    for _, e in edges[edges.src.isin(st.index) & edges.dst.isin(st.index) & (edges.src != edges.dst)].iterrows():
-        a, b = st.loc[e.src], st.loc[e.dst]
-        arrow = FancyArrowPatch((a.lon, a.lat), (b.lon, b.lat), connectionstyle="arc3,rad=0.18",
-                                arrowstyle="-|>", mutation_scale=12, shrinkA=14, shrinkB=14,
-                                linewidth=0.6 + 5.5 * e.trajets / max_trips, color="#555", alpha=0.35 + 0.5 * e.trajets / max_trips)
-        ax.add_patch(arrow)
-    sc = ax.scatter(st.lon, st.lat, s=st.capacity * 25, c=st.solde, cmap="coolwarm_r", vmin=-vmax, vmax=vmax,
-                    edgecolors="black", zorder=3)
-    for sid, r in st.iterrows():
-        ax.annotate(f"{sid}\n{r['name']}", (r.lon, r.lat), textcoords="offset points", xytext=(0, 16),
-                    ha="center", fontsize=8)
-    pad_x = (st.lon.max() - st.lon.min()) * 0.25 + 1e-3
-    pad_y = (st.lat.max() - st.lat.min()) * 0.25 + 1e-3
-    ax.set_xlim(st.lon.min() - pad_x, st.lon.max() + pad_x)
-    ax.set_ylim(st.lat.min() - pad_y, st.lat.max() + pad_y)
-    ax.set_xticks([])
-    ax.set_yticks([])
+    fig, ax = plt.subplots(figsize=(11, 8.5))
+    maxw = max(float(e.trajets.max()), 1.0) if len(e) else 1.0
+    for _, r in e.iterrows():
+        a, b = v.loc[r.src], v.loc[r.dst]
+        ax.annotate("", xy=(b.longitude, b.latitude), xytext=(a.longitude, a.latitude),
+                    arrowprops=dict(arrowstyle="-|>", lw=0.4 + 5.5 * r.trajets / maxw, alpha=0.35 + 0.5 * r.trajets / maxw,
+                                    color="#555555", shrinkA=4, shrinkB=4, connectionstyle="arc3,rad=0.12"))
+    sizes = [30 + 260 * (pr.get(i, 1.0) / max(pr.max(), 1e-9)) for i in v.index]
+    colors = [bal.get(i, 0.0) for i in v.index]
+    lim = max(abs(min(colors)), abs(max(colors)), 1e-9)
+    sc = ax.scatter(v.longitude, v.latitude, s=sizes, c=colors, cmap="coolwarm_r", vmin=-lim, vmax=lim,
+                    edgecolors="black", linewidths=0.4, zorder=3)
+    for sid in set(rec.entity.str.split("->").str[0]):
+        if sid in v.index:
+            ax.scatter([v.loc[sid].longitude], [v.loc[sid].latitude], s=520, facecolors="none", edgecolors="#c0392b", linewidths=2, zorder=4)
+            ax.annotate(sid, (v.loc[sid].longitude, v.loc[sid].latitude), xytext=(6, 8), textcoords="offset points", fontsize=8, color="#c0392b", weight="bold")
+    for sid in pr.sort_values(ascending=False).head(5).index:
+        if sid in v.index:
+            ax.annotate(sid, (v.loc[sid].longitude, v.loc[sid].latitude), xytext=(5, -11), textcoords="offset points", fontsize=7)
+    cb = fig.colorbar(sc, ax=ax, shrink=0.7)
+    cb.set_label("solde net journalier (arrivees - departs) : rouge = se vide, bleu = sature")
+    ax.set_title(f"Reseau de stations - {city} (aretes >= {min_trips} trajets)\n"
+                 f"sommet : taille = PageRank GraphX pondere ; arete : epaisseur = nombre de trajets\n"
+                 f"cercle rouge = station a reequilibrer", fontsize=10)
+    ax.set_xlabel("longitude"); ax.set_ylabel("latitude"); ax.grid(alpha=0.2)
+    OUT.mkdir(parents=True, exist_ok=True)
+    path = OUT / f"reseau_{city.lower()}.png"
+    fig.tight_layout(); fig.savefig(path, dpi=130); plt.close(fig)
+    print("ecrit :", path)
 
-cbar = fig.colorbar(sc, ax=axes, shrink=0.8, pad=0.02)
-cbar.set_label("solde net (arrivees - departs) : rouge = se vide, bleu = se remplit")
-fig.suptitle("Reseau Pedali.ma - trajets entre stations (octobre 2026)", fontsize=15)
-out = ROOT / "screenshots" / "reseau_stations.png"
-out.parent.mkdir(exist_ok=True)
-fig.savefig(out, dpi=130, bbox_inches="tight")
-print("ecrit :", out)
+
+def main():
+    cities = sys.argv[1:] or ["Marrakech", "Casablanca"]
+    spark = get_spark("pedali-plot")
+    spark.sparkContext.setLogLevel("ERROR")
+    vertices = spark.read.parquet(f"{LAKE}/gold/graph_export/sommets").toPandas()
+    edges = spark.read.parquet(f"{LAKE}/gold/graph_export/aretes").toPandas()
+    analysis = spark.read.parquet(f"{LAKE}/gold/graph_analysis").toPandas()
+    spark.stop()
+    for city in cities:
+        plot_city(city, vertices, edges, analysis, min_trips=3)
+
+
+if __name__ == "__main__":
+    main()

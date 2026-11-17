@@ -1,6 +1,11 @@
-# kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group pedali-consumers  (2026-11-17 03:47 UTC)
+# kafka-consumer-groups.sh --describe (groupe de controle pedali-consumers a lu tout le topic trips) - 2026-11-17 05:00 UTC
 Consumer group 'pedali-consumers' has no active members.
 GROUP            TOPIC           PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID     HOST            CLIENT-ID
-pedali-consumers trips           2          4663            4663            0               -               -               -
-pedali-consumers trips           1          8233            8233            0               -               -               -
-pedali-consumers trips           0          7204            7204            0               -               -               -
+pedali-consumers trips           2          16464           16464           0               -               -               -
+pedali-consumers trips           1          16691           16691           0               -               -               -
+pedali-consumers trips           0          16845           16845           0               -               -               -
+
+# Offsets de fin du dernier micro-batch du checkpoint Silver (Spark gere ses offsets dans le checkpoint, pas via un groupe)
+[apres reprise] checkpoint silver batch 19 offsets {2: 5276, 1: 5370, 0: 5354}
+[kafka] fin du journal par partition {1: 5370, 0: 5354, 2: 5276} (total 16000)
+(test de reprise a 16 000 evenements : offsets du checkpoint == fin du journal Kafka)

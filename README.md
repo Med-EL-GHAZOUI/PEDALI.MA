@@ -61,17 +61,33 @@ bash scripts/load_history.sh                       # historique -> s3a://lake/br
 # notebooks a executer dans Jupyter (http://localhost:8888) : 01, 02, 02b, 03, 03b
 ```
 
-> Les Parties 4 a 6 (streaming, pipeline Delta, graphes) ci-dessous ont ete ecrites pour l'ancien schema de donnees
-> (`start_station_id`, `completed`...) : elles sont a porter sur le schema du sujet pour le jalon 2.
+## Jalon 2 (Parties 4 a 6) - branche `jalon2`
+
+```bash
+# Partie 4 : streaming Kafka (console, JSON Bronze, comptages, watermark) - le producteur envoie en parallele
+python producer/producer.py --mode kafka --bootstrap kafka:9092 --n 50000 --limit 9000 --rate 150     # dans Jupyter
+python pipeline/part4_streaming.py --seconds 100
+python tests/check_watermark.py                    # evenement en retard de 15 min
+# Partie 5 : pipeline Bronze / Silver / Gold (Delta) et test d'arret / reprise
+python pipeline/medallion.py --seconds 300
+python tests/check_pipeline_restart.py             # ~10 min : arret, 2 min de production, reprise
+# Partie 6 : graphes
+python graphframes/graph_analysis.py               # GraphFrames + exports (s3a://lake/gold/graph_export, graph_analysis)
+bash scripts/run_graphx.sh                         # GraphX (Scala) dans spark-shell
+python graphframes/plot_network.py Marrakech Casablanca
+```
+
+Rapport : [docs/rapport_jalon2.pdf](docs/rapport_jalon2.pdf).
 
 ## Preuves (dossier `reports/`)
 
 | Livrable | Fichier |
 |---|---|
-| Couches Bronze / Silver / Gold dans MinIO | `minio_layers.txt` |
-| DESCRIBE HISTORY de la table Gold | `delta_describe_history_gold.txt` |
-| `kafka-consumer-groups.sh --describe` | `kafka_consumer_groups.txt` |
-| Sink console et micro-batches | `streaming_console_microbatches.txt` |
-| DAG / stages des RDD | `rdd_dag_stages.txt` |
-| Test arret/redemarrage du pipeline (ancien schema) | `pipeline_restart_output.txt` |
-| Jalon 1 : explain(True), validation, resultats | `jalon1_*.txt`, `rdd_dag_stages.txt` |
+| Jalon 1 : explain(True), validation, DAG des RDD | `jalon1_*.txt`, `rdd_dag_stages.txt` |
+| Partie 4 : sink console, JSON Bronze, watermark | `streaming_part4_console.txt`, `streaming_part4_bronze_minio.txt`, `streaming_watermark_demo.txt` |
+| Partie 5 : couches Bronze / Silver / Gold dans MinIO | `pipeline_minio_layers.txt` |
+| Partie 5 : DESCRIBE HISTORY du Gold, extraits Silver et Gold | `pipeline_gold_evidence.txt` |
+| Partie 5 : `kafka-consumer-groups.sh --describe` | `kafka_consumer_groups.txt` |
+| Partie 5 : arret / reprise sans perte ni doublon | `pipeline_restart_output.txt`, `pipeline_full_run_progress.txt` |
+| Partie 6 : GraphFrames, GraphX, comparaison, exports | `graphframes_output.txt`, `graphx_output.txt`, `graph_comparison.txt`, `graph_analysis_minio.txt` |
+| Partie 6 : cartes du reseau | `screenshots/jalon2_reseau_marrakech.png`, `screenshots/jalon2_reseau_casablanca.png` |

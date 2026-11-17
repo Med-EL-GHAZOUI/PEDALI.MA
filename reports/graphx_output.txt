@@ -1,0 +1,32 @@
+Graphe GraphX : 400 sommets, 11484 aretes
+[temps] degres                             1.5 s
+== Degres (voisins entrants / sortants) : 5 premieres stations ==
+(S-CAS-001,Casablanca,31,27)
+(S-CAS-002,Casablanca,35,37)
+(S-CAS-003,Casablanca,42,39)
+(S-CAS-004,Casablanca,42,24)
+(S-CAS-006,Casablanca,38,31)
+[temps] PageRank non pondere (tol 1e-4)    22.4 s
+[temps] PageRank pondere (30 iterations)   6.7 s
+== PageRank pondere par le nombre de trajets : 10 premieres stations ==
+S-MAR-064  Marrakech   centre_affaires  pondere=1.853 non pondere=1.560
+S-MAR-007  Marrakech   tourisme         pondere=1.831 non pondere=1.014
+S-RAB-072  Rabat       centre_affaires  pondere=1.827 non pondere=1.641
+S-CAS-084  Casablanca  centre_affaires  pondere=1.822 non pondere=1.500
+S-MAR-009  Marrakech   tourisme         pondere=1.816 non pondere=0.950
+S-MAR-045  Marrakech   centre_affaires  pondere=1.795 non pondere=1.397
+S-MAR-083  Marrakech   centre_affaires  pondere=1.793 non pondere=1.386
+S-TAN-055  Tanger      centre_affaires  pondere=1.752 non pondere=1.476
+S-MAR-015  Marrakech   centre_affaires  pondere=1.728 non pondere=1.492
+S-MAR-069  Marrakech   centre_affaires  pondere=1.691 non pondere=1.361
+[temps] connectedComponents                0.8 s
+== Composantes connexes (sous-reseaux isoles) ==
+composante 0 : 100 stations (Casablanca)
+composante 300 : 100 stations (Tanger)
+composante 100 : 100 stations (Marrakech)
+composante 200 : 100 stations (Rabat)
+== Plus courts chemins (sauts) vers S-CAS-066, S-MAR-014 ==
+[temps] ShortestPaths                      1.0 s
+S-CAS-066 : 100 stations atteignent cette gare, distance moyenne 1.60 sauts, maximum 2
+S-MAR-014 : 100 stations atteignent cette gare, distance moyenne 1.68 sauts, maximum 2
+Export Parquet GraphX : s3a://lake/gold/graph_analysis (1399 lignes ajoutees)

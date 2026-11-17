@@ -1,0 +1,41 @@
+# mc ls --recursive local/lake/bronze/trips_raw/  (Partie 4 : JSON bruts tels que lus dans Kafka)
+[2026-11-17 04:28:35 UTC] 117KiB STANDARD part-00000-180b18cf-b197-4f64-9c71-105b9c12ed93-c000.json
+[2026-11-17 04:28:15 UTC] 148KiB STANDARD part-00000-2b5e320e-6a2b-433b-bde5-145e99f19868-c000.json
+[2026-11-17 04:28:50 UTC]  81KiB STANDARD part-00000-2b847612-069c-45d5-b33c-179859029838-c000.json
+[2026-11-17 04:28:56 UTC]  60KiB STANDARD part-00000-4a14d6f4-0109-4c01-8e9b-7b6a6c71133f-c000.json
+[2026-11-17 04:28:45 UTC]  99KiB STANDARD part-00000-537ff28b-f31e-4eae-b19c-eb7904d8af84-c000.json
+[2026-11-17 04:28:13 UTC] 150KiB STANDARD part-00000-61c7328f-ff02-49fd-92a5-63be64f598fd-c000.json
+[2026-11-17 04:28:25 UTC] 118KiB STANDARD part-00000-6e5a0045-4aad-412c-a52d-d53cff3d0d5d-c000.json
+[2026-11-17 04:28:10 UTC] 151KiB STANDARD part-00000-835d5257-5ef3-495b-a7bb-03d589c09b38-c000.json
+[2026-11-17 04:28:31 UTC] 103KiB STANDARD part-00000-c37fe929-bdb0-4a49-884a-cbc94175ca8f-c000.json
+[2026-11-17 04:28:02 UTC] 162KiB STANDARD part-00000-c906b2c9-5a82-428c-a00d-00d75947e202-c000.json
+[2026-11-17 04:28:40 UTC]  97KiB STANDARD part-00000-d3e09da5-49b6-40f9-b509-0cdb7b493785-c000.json
+[2026-11-17 04:28:20 UTC] 140KiB STANDARD part-00000-e5c5e008-bc39-4008-b99d-a8a37d228a42-c000.json
+[2026-11-17 04:28:56 UTC]  75KiB STANDARD part-00001-1912daff-2d6d-421c-b118-5eede9ced82e-c000.json
+[2026-11-17 04:28:50 UTC]  72KiB STANDARD part-00001-45a20938-00e9-45cf-901c-fa116ccff008-c000.json
+[2026-11-17 04:28:02 UTC] 143KiB STANDARD part-00001-48abb1f8-538f-4307-99ce-4d2a16218675-c000.json
+[2026-11-17 04:28:20 UTC] 137KiB STANDARD part-00001-4c19666b-ebc8-438d-a6ba-67f1b771b87f-c000.json
+[2026-11-17 04:28:40 UTC]  84KiB STANDARD part-00001-5527e52f-1990-4549-a8e3-7c3028d13c78-c000.json
+[2026-11-17 04:28:25 UTC] 107KiB STANDARD part-00001-59bd0007-87a8-4ef6-bb45-92b36ff884cc-c000.json
+[2026-11-17 04:28:35 UTC]  86KiB STANDARD part-00001-9674e5c2-66dd-495a-94fe-ec080b3b30cd-c000.json
+[2026-11-17 04:28:10 UTC] 161KiB STANDARD part-00001-b4aeede9-dfe7-4ed4-afe0-9b5ca09edf6a-c000.json
+[2026-11-17 04:28:45 UTC]  69KiB STANDARD part-00001-d197129c-43d9-43ea-b0b3-3a50ac02b0e2-c000.json
+[2026-11-17 04:28:13 UTC] 162KiB STANDARD part-00001-d5cdcfa9-2f6c-46a0-a3ed-34fbe7ca8bf7-c000.json
+[2026-11-17 04:28:15 UTC] 158KiB STANDARD part-00001-e28c0557-8cb3-43d1-9079-bb66e7f82c53-c000.json
+[2026-11-17 04:28:31 UTC]  88KiB STANDARD part-00001-e8c70c96-7587-40bc-9326-aa80dd609d87-c000.json
+[2026-11-17 04:28:40 UTC] 100KiB STANDARD part-00002-3f3848f9-32cf-4101-b946-a5af7781083e-c000.json
+[2026-11-17 04:28:31 UTC]  90KiB STANDARD part-00002-44b82bc0-723e-4e08-a3e3-835b698338ed-c000.json
+[2026-11-17 04:28:55 UTC]  69KiB STANDARD part-00002-68404055-88d5-4bcf-add2-abe96b5a4f64-c000.json
+[2026-11-17 04:28:35 UTC]  91KiB STANDARD part-00002-73ab20a6-e154-4f25-ac58-34330375e587-c000.json
+[2026-11-17 04:28:10 UTC] 144KiB STANDARD part-00002-756c0348-9270-4482-a712-8353888c6182-c000.json
+[2026-11-17 04:28:15 UTC] 150KiB STANDARD part-00002-7f173ce3-9aaf-4f0d-bfa2-d1fd1ef5dc1c-c000.json
+[2026-11-17 04:28:03 UTC] 149KiB STANDARD part-00002-9e2de974-bb22-400b-bd49-a90ef0ca2e86-c000.json
+[2026-11-17 04:28:25 UTC]  65KiB STANDARD part-00002-c23722e6-414c-47d8-85ed-0496307f17c2-c000.json
+[2026-11-17 04:28:12 UTC] 143KiB STANDARD part-00002-dad9a1bf-db48-4798-b1c4-9e34c0a99e4b-c000.json
+[2026-11-17 04:28:45 UTC] 112KiB STANDARD part-00002-e1fce143-2191-4e8f-9db3-d7ead19e8459-c000.json
+[2026-11-17 04:28:20 UTC] 138KiB STANDARD part-00002-f768e2ff-24bb-4bdf-b9e6-6a668e780139-c000.json
+[2026-11-17 04:28:50 UTC]  89KiB STANDARD part-00002-fa93b247-ea62-4539-9ebf-50235befcf48-c000.json
+
+# extrait (mc cat, 2 premieres lignes du premier fichier)
+{"key":"T-00005913","value":"{\"trip_id\": \"T-00005913\", \"user_id\": \"U-07568\", \"vehicle_id\": \"V-BK-0466\", \"vehicle_type\": \"BIKE\", \"start_station\": \"S-CAS-073\", \"end_station\": null, \"city\": \"Casablanca\", \"status\": \"UNLOCKED\", \"duration_s\": null, \"distance_km\": null, \"battery_pct\": null, \"price_mad\": null, \"event_time\": \"2026-10-20T15:44:26Z\"}","topic":"trips"
+{"key":"T-00006190","value":"{\"trip_id\": \"T-00006190\", \"user_id\": \"U-07077\", \"vehicle_id\": \"V-EB-0952\", \"vehicle_type\": \"EBIKE\", \"start_station\": \"S-CAS-065\", \"end_station\": null, \"city\": \"Casablanca\", \"status\": \"RESERVED\", \"duration_s\": null, \"distance_km\": null, \"battery_pct\": 26, \"price_mad\": null, \"event_time\": \"2026-10-20T15:47:28Z\"}","topic":"trips",

@@ -1,0 +1,737 @@
+-------------------------------------------
+Batch: 0
+-------------------------------------------
++----------+------------+------+---------+----------+---------+-------------------+---------+------+
+|trip_id   |vehicle_type|city  |status   |duration_s|price_mad|event_time         |partition|offset|
++----------+------------+------+---------+----------+---------+-------------------+---------+------+
+|T-00003786|BIKE        |Tanger|RESERVED |NULL      |NULL     |2026-10-17 00:25:39|0        |0     |
+|T-00003786|BIKE        |Tanger|UNLOCKED |NULL      |NULL     |2026-10-17 00:28:08|0        |1     |
+|T-00007537|EBIKE       |Rabat |RESERVED |NULL      |NULL     |2026-10-17 00:33:55|0        |2     |
+|T-00007537|EBIKE       |Rabat |UNLOCKED |NULL      |NULL     |2026-10-17 00:35:41|0        |3     |
+|T-00007537|EBIKE       |Rabat |ENDED    |778       |12.08    |2026-10-17 00:48:39|0        |4     |
+|T-00003786|BIKE        |Tanger|ENDED    |1477      |15.31    |2026-10-17 00:52:45|0        |5     |
+|T-00008351|BIKE        |Tanger|RESERVED |NULL      |NULL     |2026-10-17 03:47:31|0        |6     |
+|T-00008351|BIKE        |Tanger|CANCELLED|NULL      |NULL     |2026-10-17 03:49:59|0        |7     |
++----------+------------+------+---------+----------+---------+-------------------+---------+------+
+only showing top 8 rows
+### console_raw          micro-batch   0 :   999 lignes, 75 lignes/s, trigger 13404 ms
+### bronze_raw           micro-batch   0 :   998 lignes, 84 lignes/s, trigger 11922 ms
+-------------------------------------------
+Batch: 0
+-------------------------------------------
++----------+--------------+-----+
+|city      |status        |count|
++----------+--------------+-----+
+|Casablanca|ENDED         |90   |
+|Marrakech |FAULT_REPORTED|2    |
+|Rabat     |UNLOCKED      |78   |
+|Marrakech |CANCELLED     |8    |
+|Casablanca|FAULT_REPORTED|2    |
+|Casablanca|CANCELLED     |3    |
+|Marrakech |RESERVED      |85   |
+|Casablanca|RESERVED      |98   |
+|Marrakech |UNLOCKED      |76   |
+|Tanger    |FAULT_REPORTED|1    |
+|Rabat     |RESERVED      |86   |
+|Tanger    |CANCELLED     |7    |
+|Tanger    |UNLOCKED      |68   |
+|Rabat     |CANCELLED     |8    |
+|Rabat     |ENDED         |73   |
+|Marrakech |ENDED         |73   |
+|Rabat     |FAULT_REPORTED|5    |
+|Casablanca|UNLOCKED      |95   |
+|Tanger    |RESERVED      |74   |
+|Tanger    |ENDED         |66   |
++----------+--------------+-----+
+-------------------------------------------
+Batch: 0
+-------------------------------------------
+-------------------------------------------
+Batch: 1
+-------------------------------------------
++------------------------------------------+---------+-----+
+|fenetre                                   |city     |count|
++------------------------------------------+---------+-----+
+|{2026-10-17 04:30:00, 2026-10-17 04:40:00}|Tanger   |2    |
+|{2026-10-17 06:10:00, 2026-10-17 06:20:00}|Tanger   |1    |
+|{2026-10-17 06:10:00, 2026-10-17 06:20:00}|Rabat    |9    |
+|{2026-10-17 06:30:00, 2026-10-17 06:40:00}|Rabat    |7    |
+|{2026-10-17 06:50:00, 2026-10-17 07:00:00}|Tanger   |4    |
+|{2026-10-17 07:30:00, 2026-10-17 07:40:00}|Rabat    |7    |
+|{2026-10-17 07:30:00, 2026-10-17 07:40:00}|Marrakech|9    |
+|{2026-10-17 09:00:00, 2026-10-17 09:10:00}|Rabat    |6    |
++------------------------------------------+---------+-----+
+only showing top 8 rows
++----------+------------+----------+--------------+----------+---------+-------------------+---------+------+
+|trip_id   |vehicle_type|city      |status        |duration_s|price_mad|event_time         |partition|offset|
++----------+------------+----------+--------------+----------+---------+-------------------+---------+------+
+|T-00014860|BIKE        |Casablanca|RESERVED      |NULL      |NULL     |2026-10-17 15:06:14|0        |366   |
+|T-00012020|SCOOTER     |Rabat     |FAULT_REPORTED|NULL      |NULL     |2026-10-17 15:06:23|0        |367   |
+|T-00014860|BIKE        |Casablanca|UNLOCKED      |NULL      |NULL     |2026-10-17 15:08:41|0        |368   |
+|T-00013091|EBIKE       |Marrakech |RESERVED      |NULL      |NULL     |2026-10-17 15:14:37|0        |369   |
+|T-00013830|EBIKE       |Casablanca|RESERVED      |NULL      |NULL     |2026-10-17 15:15:12|0        |370   |
+|T-00013091|EBIKE       |Marrakech |UNLOCKED      |NULL      |NULL     |2026-10-17 15:16:57|0        |371   |
+|T-00011237|BIKE        |Marrakech |ENDED         |903       |10.53    |2026-10-17 15:18:10|0        |372   |
+|T-00003482|BIKE        |Marrakech |ENDED         |999       |11.32    |2026-10-17 15:19:14|0        |373   |
++----------+------------+----------+--------------+----------+---------+-------------------+---------+------+
+only showing top 8 rows
+-------------------------------------------
+Batch: 1
+-------------------------------------------
+-------------------------------------------
+Batch: 2
+-------------------------------------------
++----------+--------------+-----+
+|city      |status        |count|
++----------+--------------+-----+
+|Casablanca|ENDED         |193  |
+|Marrakech |FAULT_REPORTED|5    |
+|Rabat     |UNLOCKED      |159  |
+|Casablanca|FAULT_REPORTED|10   |
+|Casablanca|CANCELLED     |14   |
+|Marrakech |RESERVED      |168  |
+|Casablanca|RESERVED      |222  |
+|Marrakech |CANCELLED     |15   |
+|Marrakech |UNLOCKED      |155  |
+|Tanger    |FAULT_REPORTED|4    |
+|Rabat     |RESERVED      |166  |
+|Tanger    |CANCELLED     |13   |
+|Tanger    |UNLOCKED      |114  |
+|Rabat     |CANCELLED     |12   |
+|Rabat     |ENDED         |137  |
+|Marrakech |ENDED         |148  |
+|Rabat     |FAULT_REPORTED|12   |
+|Casablanca|UNLOCKED      |209  |
+|Tanger    |RESERVED      |129  |
+|Tanger    |ENDED         |112  |
++----------+--------------+-----+
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+|trip_id   |vehicle_type|city      |status  |duration_s|price_mad|event_time         |partition|offset|
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+|T-00009461|BIKE        |Marrakech |UNLOCKED|NULL      |NULL     |2026-10-18 07:16:33|0        |693   |
+|T-00013373|EBIKE       |Tanger    |RESERVED|NULL      |NULL     |2026-10-18 07:17:37|0        |694   |
+|T-00006144|EBIKE       |Rabat     |ENDED   |1326      |18.47    |2026-10-18 07:18:30|0        |695   |
+|T-00006062|EBIKE       |Casablanca|RESERVED|NULL      |NULL     |2026-10-18 07:20:30|0        |696   |
+|T-00013373|EBIKE       |Tanger    |UNLOCKED|NULL      |NULL     |2026-10-18 07:20:44|0        |697   |
+|T-00005522|EBIKE       |Tanger    |ENDED   |524       |9.11     |2026-10-18 07:23:32|0        |698   |
+|T-00006062|EBIKE       |Casablanca|UNLOCKED|NULL      |NULL     |2026-10-18 07:23:51|0        |699   |
+|T-00007393|BIKE        |Casablanca|RESERVED|NULL      |NULL     |2026-10-18 07:25:41|0        |700   |
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+only showing top 8 rows
+-------------------------------------------
+Batch: 1
+-------------------------------------------
++------------------------------------------+----------+-----+
+|fenetre                                   |city      |count|
++------------------------------------------+----------+-----+
+|{2026-10-17 16:20:00, 2026-10-17 16:30:00}|Rabat     |4    |
+|{2026-10-17 16:40:00, 2026-10-17 16:50:00}|Casablanca|8    |
+|{2026-10-17 16:50:00, 2026-10-17 17:00:00}|Casablanca|12   |
+|{2026-10-17 17:10:00, 2026-10-17 17:20:00}|Rabat     |7    |
+|{2026-10-17 19:10:00, 2026-10-17 19:20:00}|Casablanca|5    |
+|{2026-10-17 19:20:00, 2026-10-17 19:30:00}|Casablanca|4    |
+|{2026-10-17 19:40:00, 2026-10-17 19:50:00}|Rabat     |11   |
+|{2026-10-17 19:40:00, 2026-10-17 19:50:00}|Casablanca|2    |
++------------------------------------------+----------+-----+
+only showing top 8 rows
+-------------------------------------------
+Batch: 2
+-------------------------------------------
++----------+--------------+-----+
+|city      |status        |count|
++----------+--------------+-----+
+|Casablanca|ENDED         |294  |
+|Marrakech |FAULT_REPORTED|9    |
+|Rabat     |UNLOCKED      |212  |
+|Casablanca|FAULT_REPORTED|16   |
+|Casablanca|CANCELLED     |16   |
+|Marrakech |RESERVED      |259  |
+|Casablanca|RESERVED      |331  |
+|Marrakech |CANCELLED     |22   |
+|Marrakech |UNLOCKED      |236  |
+|Tanger    |FAULT_REPORTED|7    |
+|Rabat     |RESERVED      |222  |
+|Tanger    |CANCELLED     |18   |
+|Tanger    |UNLOCKED      |194  |
+|Rabat     |CANCELLED     |15   |
+|Rabat     |ENDED         |192  |
+|Marrakech |ENDED         |218  |
+|Rabat     |FAULT_REPORTED|16   |
+|Casablanca|UNLOCKED      |319  |
+|Tanger    |RESERVED      |214  |
+|Tanger    |ENDED         |186  |
++----------+--------------+-----+
+### console_raw          micro-batch   2 :   998 lignes, 489 lignes/s, trigger 2041 ms
+### bronze_raw           micro-batch   2 :   999 lignes, 471 lignes/s, trigger 2118 ms
+### counts_city_status   micro-batch   1 :   999 lignes, 270 lignes/s, trigger 3704 ms
+### wm_windows           micro-batch   1 :   999 lignes, 284 lignes/s, trigger 3523 ms
+-------------------------------------------
+Batch: 3
+-------------------------------------------
++----------+------------+----------+--------------+----------+---------+-------------------+---------+------+
+|trip_id   |vehicle_type|city      |status        |duration_s|price_mad|event_time         |partition|offset|
++----------+------------+----------+--------------+----------+---------+-------------------+---------+------+
+|T-00012354|BIKE        |Casablanca|RESERVED      |NULL      |NULL     |2026-10-18 18:11:19|0        |1013  |
+|T-00004257|SCOOTER     |Rabat     |ENDED         |1400      |21.67    |2026-10-18 18:11:25|0        |1014  |
+|T-00002540|SCOOTER     |Casablanca|ENDED         |1174      |18.65    |2026-10-18 18:11:32|0        |1015  |
+|T-00012903|EBIKE       |Rabat     |FAULT_REPORTED|NULL      |NULL     |2026-10-18 18:12:12|0        |1016  |
+|T-00012354|BIKE        |Casablanca|UNLOCKED      |NULL      |NULL     |2026-10-18 18:12:58|0        |1017  |
+|T-00001500|BIKE        |Casablanca|ENDED         |744       |9.2      |2026-10-18 18:13:01|0        |1018  |
+|T-00006445|BIKE        |Rabat     |RESERVED      |NULL      |NULL     |2026-10-18 18:14:45|0        |1019  |
+|T-00006907|BIKE        |Rabat     |RESERVED      |NULL      |NULL     |2026-10-18 18:15:18|0        |1020  |
++----------+------------+----------+--------------+----------+---------+-------------------+---------+------+
+only showing top 8 rows
+-------------------------------------------
+Batch: 2
+-------------------------------------------
++------------------------------------------+----------+-----+
+|fenetre                                   |city      |count|
++------------------------------------------+----------+-----+
+|{2026-10-18 07:30:00, 2026-10-18 07:40:00}|Casablanca|9    |
+|{2026-10-18 08:20:00, 2026-10-18 08:30:00}|Casablanca|8    |
+|{2026-10-18 09:30:00, 2026-10-18 09:40:00}|Marrakech |4    |
+|{2026-10-18 10:00:00, 2026-10-18 10:10:00}|Rabat     |9    |
+|{2026-10-18 10:40:00, 2026-10-18 10:50:00}|Marrakech |8    |
+|{2026-10-18 10:50:00, 2026-10-18 11:00:00}|Tanger    |10   |
+|{2026-10-18 11:00:00, 2026-10-18 11:10:00}|Rabat     |1    |
+|{2026-10-18 11:50:00, 2026-10-18 12:00:00}|Tanger    |4    |
++------------------------------------------+----------+-----+
+only showing top 8 rows
+-------------------------------------------
+Batch: 3
+-------------------------------------------
++----------+--------------+-----+
+|city      |status        |count|
++----------+--------------+-----+
+|Casablanca|ENDED         |413  |
+|Marrakech |FAULT_REPORTED|10   |
+|Rabat     |UNLOCKED      |283  |
+|Casablanca|FAULT_REPORTED|19   |
+|Casablanca|CANCELLED     |28   |
+|Marrakech |RESERVED      |336  |
+|Casablanca|RESERVED      |457  |
+|Marrakech |CANCELLED     |26   |
+|Marrakech |UNLOCKED      |306  |
+|Tanger    |FAULT_REPORTED|14   |
+|Rabat     |RESERVED      |293  |
+|Tanger    |CANCELLED     |20   |
+|Tanger    |UNLOCKED      |254  |
+|Rabat     |CANCELLED     |19   |
+|Rabat     |ENDED         |255  |
+|Marrakech |ENDED         |290  |
+|Rabat     |FAULT_REPORTED|20   |
+|Casablanca|UNLOCKED      |437  |
+|Tanger    |RESERVED      |275  |
+|Tanger    |ENDED         |239  |
++----------+--------------+-----+
+-------------------------------------------
+Batch: 4
+-------------------------------------------
++----------+------------+----------+---------+----------+---------+-------------------+---------+------+
+|trip_id   |vehicle_type|city      |status   |duration_s|price_mad|event_time         |partition|offset|
++----------+------------+----------+---------+----------+---------+-------------------+---------+------+
+|T-00016984|BIKE        |Casablanca|RESERVED |NULL      |NULL     |2026-10-19 10:57:52|0        |1341  |
+|T-00016984|BIKE        |Casablanca|UNLOCKED |NULL      |NULL     |2026-10-19 10:58:56|0        |1342  |
+|T-00004416|EBIKE       |Marrakech |CANCELLED|NULL      |NULL     |2026-10-19 10:59:10|0        |1343  |
+|T-00000853|BIKE        |Casablanca|UNLOCKED |NULL      |NULL     |2026-10-19 11:00:40|0        |1344  |
+|T-00017071|BIKE        |Marrakech |RESERVED |NULL      |NULL     |2026-10-19 11:14:50|0        |1345  |
+|T-00014222|BIKE        |Tanger    |RESERVED |NULL      |NULL     |2026-10-19 11:16:36|0        |1346  |
+|T-00017071|BIKE        |Marrakech |UNLOCKED |NULL      |NULL     |2026-10-19 11:17:14|0        |1347  |
+|T-00014222|BIKE        |Tanger    |UNLOCKED |NULL      |NULL     |2026-10-19 11:20:40|0        |1348  |
++----------+------------+----------+---------+----------+---------+-------------------+---------+------+
+only showing top 8 rows
+-------------------------------------------
+Batch: 4
+-------------------------------------------
++----------+--------------+-----+
+|city      |status        |count|
++----------+--------------+-----+
+|Casablanca|ENDED         |521  |
+|Marrakech |FAULT_REPORTED|12   |
+|Rabat     |UNLOCKED      |328  |
+|Casablanca|FAULT_REPORTED|24   |
+|Casablanca|CANCELLED     |35   |
+|Marrakech |RESERVED      |406  |
+|Casablanca|RESERVED      |578  |
+|Marrakech |CANCELLED     |32   |
+|Marrakech |UNLOCKED      |372  |
+|Tanger    |FAULT_REPORTED|15   |
+|Rabat     |RESERVED      |342  |
+|Tanger    |CANCELLED     |25   |
+|Tanger    |UNLOCKED      |317  |
+|Rabat     |CANCELLED     |24   |
+|Rabat     |ENDED         |299  |
+|Marrakech |ENDED         |352  |
+|Rabat     |FAULT_REPORTED|22   |
+|Casablanca|UNLOCKED      |551  |
+|Tanger    |RESERVED      |343  |
+|Tanger    |ENDED         |302  |
++----------+--------------+-----+
+-------------------------------------------
+Batch: 3
+-------------------------------------------
++------------------------------------------+----------+-----+
+|fenetre                                   |city      |count|
++------------------------------------------+----------+-----+
+|{2026-10-18 17:50:00, 2026-10-18 18:00:00}|Tanger    |4    |
+|{2026-10-18 18:30:00, 2026-10-18 18:40:00}|Marrakech |7    |
+|{2026-10-18 19:20:00, 2026-10-18 19:30:00}|Tanger    |4    |
+|{2026-10-18 19:30:00, 2026-10-18 19:40:00}|Casablanca|10   |
+|{2026-10-18 21:10:00, 2026-10-18 21:20:00}|Rabat     |3    |
+|{2026-10-19 00:30:00, 2026-10-19 00:40:00}|Rabat     |2    |
+|{2026-10-19 01:00:00, 2026-10-19 01:10:00}|Rabat     |1    |
+|{2026-10-19 01:30:00, 2026-10-19 01:40:00}|Casablanca|1    |
++------------------------------------------+----------+-----+
+only showing top 8 rows
+### console_raw          micro-batch   4 :   907 lignes, 1298 lignes/s, trigger 699 ms
+### bronze_raw           micro-batch   4 :   907 lignes, 641 lignes/s, trigger 1415 ms
+### counts_city_status   micro-batch   4 :   906 lignes, 499 lignes/s, trigger 1817 ms
+### wm_windows           micro-batch   3 :   998 lignes, 432 lignes/s, trigger 2310 ms
+-------------------------------------------
+Batch: 5
+-------------------------------------------
++----------+------------+----------+---------+----------+---------+-------------------+---------+------+
+|trip_id   |vehicle_type|city      |status   |duration_s|price_mad|event_time         |partition|offset|
++----------+------------+----------+---------+----------+---------+-------------------+---------+------+
+|T-00006585|EBIKE       |Marrakech |CANCELLED|NULL      |NULL     |2026-10-19 20:42:39|0        |1648  |
+|T-00013617|BIKE        |Marrakech |RESERVED |NULL      |NULL     |2026-10-19 20:45:38|0        |1649  |
+|T-00004314|EBIKE       |Tanger    |RESERVED |NULL      |NULL     |2026-10-19 20:46:12|0        |1650  |
+|T-00004314|EBIKE       |Tanger    |UNLOCKED |NULL      |NULL     |2026-10-19 20:48:56|0        |1651  |
+|T-00013617|BIKE        |Marrakech |UNLOCKED |NULL      |NULL     |2026-10-19 20:49:23|0        |1652  |
+|T-00003492|BIKE        |Casablanca|RESERVED |NULL      |NULL     |2026-10-19 20:51:12|0        |1653  |
+|T-00003492|BIKE        |Casablanca|UNLOCKED |NULL      |NULL     |2026-10-19 20:54:59|0        |1654  |
+|T-00003781|BIKE        |Tanger    |RESERVED |NULL      |NULL     |2026-10-19 20:55:17|0        |1655  |
++----------+------------+----------+---------+----------+---------+-------------------+---------+------+
+only showing top 8 rows
+-------------------------------------------
+Batch: 5
+-------------------------------------------
++----------+--------------+-----+
+|city      |status        |count|
++----------+--------------+-----+
+|Casablanca|ENDED         |593  |
+|Marrakech |FAULT_REPORTED|14   |
+|Rabat     |UNLOCKED      |371  |
+|Casablanca|FAULT_REPORTED|26   |
+|Casablanca|CANCELLED     |42   |
+|Marrakech |RESERVED      |458  |
+|Casablanca|RESERVED      |658  |
+|Marrakech |CANCELLED     |40   |
+|Marrakech |UNLOCKED      |417  |
+|Tanger    |FAULT_REPORTED|18   |
+|Rabat     |RESERVED      |387  |
+|Tanger    |CANCELLED     |29   |
+|Tanger    |UNLOCKED      |358  |
+|Rabat     |CANCELLED     |25   |
+|Rabat     |ENDED         |339  |
+|Marrakech |ENDED         |393  |
+|Rabat     |FAULT_REPORTED|23   |
+|Casablanca|UNLOCKED      |622  |
+|Tanger    |RESERVED      |390  |
+|Tanger    |ENDED         |334  |
++----------+--------------+-----+
+-------------------------------------------
+Batch: 4
+-------------------------------------------
++------------------------------------------+----------+-----+
+|fenetre                                   |city      |count|
++------------------------------------------+----------+-----+
+|{2026-10-19 11:40:00, 2026-10-19 11:50:00}|Casablanca|6    |
+|{2026-10-19 13:20:00, 2026-10-19 13:30:00}|Tanger    |2    |
+|{2026-10-19 13:50:00, 2026-10-19 14:00:00}|Casablanca|3    |
+|{2026-10-19 16:50:00, 2026-10-19 17:00:00}|Marrakech |5    |
+|{2026-10-19 17:00:00, 2026-10-19 17:10:00}|Marrakech |6    |
+|{2026-10-19 17:20:00, 2026-10-19 17:30:00}|Tanger    |6    |
+|{2026-10-19 17:30:00, 2026-10-19 17:40:00}|Rabat     |4    |
+|{2026-10-19 17:50:00, 2026-10-19 18:00:00}|Tanger    |5    |
++------------------------------------------+----------+-----+
+only showing top 8 rows
+-------------------------------------------
+Batch: 6
+-------------------------------------------
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+|trip_id   |vehicle_type|city      |status  |duration_s|price_mad|event_time         |partition|offset|
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+|T-00007720|BIKE        |Casablanca|RESERVED|NULL      |NULL     |2026-10-20 08:37:25|0        |1907  |
+|T-00013057|BIKE        |Rabat     |RESERVED|NULL      |NULL     |2026-10-20 08:38:29|0        |1908  |
+|T-00010803|BIKE        |Rabat     |RESERVED|NULL      |NULL     |2026-10-20 08:39:00|0        |1909  |
+|T-00007720|BIKE        |Casablanca|UNLOCKED|NULL      |NULL     |2026-10-20 08:39:38|0        |1910  |
+|T-00016148|BIKE        |Marrakech |UNLOCKED|NULL      |NULL     |2026-10-20 08:41:12|0        |1911  |
+|T-00013057|BIKE        |Rabat     |UNLOCKED|NULL      |NULL     |2026-10-20 08:42:23|0        |1912  |
+|T-00003145|BIKE        |Rabat     |UNLOCKED|NULL      |NULL     |2026-10-20 08:32:35|0        |1913  |
+|T-00000442|BIKE        |Casablanca|ENDED   |493       |7.11     |2026-10-20 08:43:15|0        |1914  |
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+only showing top 8 rows
+-------------------------------------------
+Batch: 6
+-------------------------------------------
++----------+--------------+-----+
+|city      |status        |count|
++----------+--------------+-----+
+|Casablanca|ENDED         |653  |
+|Marrakech |FAULT_REPORTED|14   |
+|Rabat     |UNLOCKED      |418  |
+|Casablanca|FAULT_REPORTED|29   |
+|Casablanca|CANCELLED     |47   |
+|Marrakech |RESERVED      |510  |
+|Casablanca|RESERVED      |727  |
+|Marrakech |CANCELLED     |42   |
+|Marrakech |UNLOCKED      |465  |
+|Tanger    |FAULT_REPORTED|21   |
+|Rabat     |RESERVED      |437  |
+|Tanger    |CANCELLED     |30   |
+|Tanger    |UNLOCKED      |395  |
+|Rabat     |CANCELLED     |28   |
+|Rabat     |ENDED         |384  |
+|Marrakech |ENDED         |445  |
+|Rabat     |FAULT_REPORTED|23   |
+|Casablanca|UNLOCKED      |685  |
+|Tanger    |RESERVED      |429  |
+|Tanger    |ENDED         |372  |
++----------+--------------+-----+
+-------------------------------------------
+Batch: 5
+-------------------------------------------
++------------------------------------------+----------+-----+
+|fenetre                                   |city      |count|
++------------------------------------------+----------+-----+
+|{2026-10-19 22:30:00, 2026-10-19 22:40:00}|Casablanca|4    |
+|{2026-10-20 05:00:00, 2026-10-20 05:10:00}|Tanger    |2    |
+|{2026-10-20 05:40:00, 2026-10-20 05:50:00}|Rabat     |2    |
+|{2026-10-20 06:00:00, 2026-10-20 06:10:00}|Casablanca|3    |
+|{2026-10-20 06:20:00, 2026-10-20 06:30:00}|Tanger    |2    |
+|{2026-10-20 06:40:00, 2026-10-20 06:50:00}|Rabat     |3    |
+|{2026-10-20 06:40:00, 2026-10-20 06:50:00}|Marrakech |2    |
+|{2026-10-20 07:40:00, 2026-10-20 07:50:00}|Casablanca|5    |
++------------------------------------------+----------+-----+
+only showing top 8 rows
+### console_raw          micro-batch   6 :   617 lignes, 711 lignes/s, trigger 868 ms
+### bronze_raw           micro-batch   6 :   617 lignes, 304 lignes/s, trigger 2030 ms
+### counts_city_status   micro-batch   6 :   617 lignes, 400 lignes/s, trigger 1542 ms
+### wm_windows           micro-batch   5 :   999 lignes, 554 lignes/s, trigger 1804 ms
+-------------------------------------------
+Batch: 7
+-------------------------------------------
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+|trip_id   |vehicle_type|city      |status  |duration_s|price_mad|event_time         |partition|offset|
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+|T-00005913|BIKE        |Casablanca|UNLOCKED|NULL      |NULL     |2026-10-20 15:44:26|0        |2133  |
+|T-00006190|EBIKE       |Casablanca|RESERVED|NULL      |NULL     |2026-10-20 15:47:28|0        |2134  |
+|T-00000901|EBIKE       |Casablanca|RESERVED|NULL      |NULL     |2026-10-20 15:48:11|0        |2135  |
+|T-00015823|BIKE        |Marrakech |RESERVED|NULL      |NULL     |2026-10-20 15:48:25|0        |2136  |
+|T-00000901|EBIKE       |Casablanca|UNLOCKED|NULL      |NULL     |2026-10-20 15:49:52|0        |2137  |
+|T-00006190|EBIKE       |Casablanca|UNLOCKED|NULL      |NULL     |2026-10-20 15:50:50|0        |2138  |
+|T-00004959|BIKE        |Casablanca|RESERVED|NULL      |NULL     |2026-10-20 15:50:59|0        |2139  |
+|T-00015823|BIKE        |Marrakech |UNLOCKED|NULL      |NULL     |2026-10-20 15:52:04|0        |2140  |
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+only showing top 8 rows
+-------------------------------------------
+Batch: 7
+-------------------------------------------
++----------+--------------+-----+
+|city      |status        |count|
++----------+--------------+-----+
+|Casablanca|ENDED         |722  |
+|Marrakech |FAULT_REPORTED|17   |
+|Rabat     |UNLOCKED      |454  |
+|Casablanca|FAULT_REPORTED|35   |
+|Casablanca|CANCELLED     |54   |
+|Marrakech |RESERVED      |563  |
+|Casablanca|RESERVED      |807  |
+|Marrakech |CANCELLED     |48   |
+|Marrakech |UNLOCKED      |513  |
+|Tanger    |FAULT_REPORTED|23   |
+|Rabat     |RESERVED      |476  |
+|Tanger    |CANCELLED     |34   |
+|Tanger    |UNLOCKED      |438  |
+|Rabat     |CANCELLED     |32   |
+|Rabat     |ENDED         |417  |
+|Marrakech |ENDED         |490  |
+|Rabat     |FAULT_REPORTED|25   |
+|Casablanca|UNLOCKED      |760  |
+|Tanger    |RESERVED      |476  |
+|Tanger    |ENDED         |413  |
++----------+--------------+-----+
+-------------------------------------------
+Batch: 6
+-------------------------------------------
++------------------------------------------+----------+-----+
+|fenetre                                   |city      |count|
++------------------------------------------+----------+-----+
+|{2026-10-20 14:00:00, 2026-10-20 14:10:00}|Casablanca|5    |
+|{2026-10-20 14:40:00, 2026-10-20 14:50:00}|Casablanca|8    |
+|{2026-10-20 14:50:00, 2026-10-20 15:00:00}|Casablanca|6    |
+|{2026-10-20 15:30:00, 2026-10-20 15:40:00}|Rabat     |7    |
+|{2026-10-20 15:30:00, 2026-10-20 15:40:00}|Tanger    |2    |
+|{2026-10-20 15:40:00, 2026-10-20 15:50:00}|Casablanca|11   |
+|{2026-10-20 15:50:00, 2026-10-20 16:00:00}|Tanger    |2    |
+|{2026-10-20 16:10:00, 2026-10-20 16:20:00}|Casablanca|12   |
++------------------------------------------+----------+-----+
+only showing top 8 rows
+-------------------------------------------
+Batch: 8
+-------------------------------------------
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+|trip_id   |vehicle_type|city      |status  |duration_s|price_mad|event_time         |partition|offset|
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+|T-00014519|EBIKE       |Casablanca|RESERVED|NULL      |NULL     |2026-10-20 22:14:52|0        |2388  |
+|T-00014519|EBIKE       |Casablanca|UNLOCKED|NULL      |NULL     |2026-10-20 22:16:03|0        |2389  |
+|T-00014519|EBIKE       |Casablanca|ENDED   |463       |8.4      |2026-10-20 22:23:46|0        |2390  |
+|T-00000521|BIKE        |Tanger    |RESERVED|NULL      |NULL     |2026-10-20 22:25:23|0        |2391  |
+|T-00000521|BIKE        |Tanger    |RESERVED|NULL      |NULL     |2026-10-20 22:25:23|0        |2392  |
+|T-00000521|BIKE        |Tanger    |UNLOCKED|NULL      |NULL     |2026-10-20 22:26:30|0        |2393  |
+|T-00000521|BIKE        |Tanger    |ENDED   |1420      |14.83    |2026-10-20 22:50:10|0        |2394  |
+|T-00006687|EBIKE       |Marrakech |RESERVED|NULL      |NULL     |2026-10-20 23:09:14|0        |2395  |
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+only showing top 8 rows
+-------------------------------------------
+Batch: 8
+-------------------------------------------
++----------+--------------+-----+
+|city      |status        |count|
++----------+--------------+-----+
+|Casablanca|ENDED         |781  |
+|Marrakech |FAULT_REPORTED|18   |
+|Rabat     |UNLOCKED      |487  |
+|Casablanca|FAULT_REPORTED|37   |
+|Casablanca|CANCELLED     |58   |
+|Marrakech |RESERVED      |620  |
+|Casablanca|RESERVED      |882  |
+|Marrakech |CANCELLED     |51   |
+|Marrakech |UNLOCKED      |561  |
+|Tanger    |FAULT_REPORTED|25   |
+|Rabat     |RESERVED      |510  |
+|Tanger    |CANCELLED     |37   |
+|Tanger    |UNLOCKED      |488  |
+|Rabat     |CANCELLED     |32   |
+|Rabat     |ENDED         |447  |
+|Marrakech |ENDED         |534  |
+|Rabat     |FAULT_REPORTED|26   |
+|Casablanca|UNLOCKED      |828  |
+|Tanger    |RESERVED      |531  |
+|Tanger    |ENDED         |458  |
++----------+--------------+-----+
+-------------------------------------------
+Batch: 7
+-------------------------------------------
++------------------------------------------+----------+-----+
+|fenetre                                   |city      |count|
++------------------------------------------+----------+-----+
+|{2026-10-20 22:40:00, 2026-10-20 22:50:00}|Casablanca|1    |
+|{2026-10-21 06:00:00, 2026-10-21 06:10:00}|Tanger    |4    |
+|{2026-10-21 06:10:00, 2026-10-21 06:20:00}|Marrakech |6    |
+|{2026-10-21 06:10:00, 2026-10-21 06:20:00}|Casablanca|8    |
+|{2026-10-21 08:10:00, 2026-10-21 08:20:00}|Tanger    |12   |
+|{2026-10-21 08:20:00, 2026-10-21 08:30:00}|Marrakech |6    |
+|{2026-10-21 08:30:00, 2026-10-21 08:40:00}|Casablanca|7    |
+|{2026-10-21 08:30:00, 2026-10-21 08:40:00}|Tanger    |5    |
++------------------------------------------+----------+-----+
+only showing top 8 rows
+### console_raw          micro-batch   8 :   614 lignes, 771 lignes/s, trigger 796 ms
+### bronze_raw           micro-batch   8 :   614 lignes, 439 lignes/s, trigger 1400 ms
+### counts_city_status   micro-batch   8 :   614 lignes, 377 lignes/s, trigger 1627 ms
+### wm_windows           micro-batch   7 :   614 lignes, 330 lignes/s, trigger 1861 ms
+-------------------------------------------
+Batch: 9
+-------------------------------------------
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+|trip_id   |vehicle_type|city      |status  |duration_s|price_mad|event_time         |partition|offset|
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+|T-00012103|BIKE        |Marrakech |UNLOCKED|NULL      |NULL     |2026-10-21 08:59:18|0        |2601  |
+|T-00010888|BIKE        |Marrakech |UNLOCKED|NULL      |NULL     |2026-10-21 09:00:23|0        |2602  |
+|T-00008923|EBIKE       |Casablanca|ENDED   |1221      |17.24    |2026-10-21 08:56:50|0        |2603  |
+|T-00007252|BIKE        |Tanger    |UNLOCKED|NULL      |NULL     |2026-10-21 09:00:45|0        |2604  |
+|T-00015571|BIKE        |Tanger    |UNLOCKED|NULL      |NULL     |2026-10-21 09:02:23|0        |2605  |
+|T-00005119|SCOOTER     |Rabat     |ENDED   |1448      |22.31    |2026-10-21 09:05:27|0        |2606  |
+|T-00016069|BIKE        |Rabat     |RESERVED|NULL      |NULL     |2026-10-21 09:05:58|0        |2607  |
+|T-00012103|BIKE        |Marrakech |ENDED   |614       |8.12     |2026-10-21 09:09:32|0        |2608  |
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+only showing top 8 rows
+-------------------------------------------
+Batch: 9
+-------------------------------------------
++----------+--------------+-----+
+|city      |status        |count|
++----------+--------------+-----+
+|Casablanca|ENDED         |848  |
+|Marrakech |FAULT_REPORTED|21   |
+|Rabat     |UNLOCKED      |538  |
+|Casablanca|FAULT_REPORTED|38   |
+|Casablanca|CANCELLED     |64   |
+|Marrakech |RESERVED      |670  |
+|Casablanca|RESERVED      |949  |
+|Marrakech |CANCELLED     |54   |
+|Marrakech |UNLOCKED      |613  |
+|Tanger    |FAULT_REPORTED|28   |
+|Rabat     |RESERVED      |561  |
+|Tanger    |CANCELLED     |43   |
+|Tanger    |UNLOCKED      |516  |
+|Rabat     |CANCELLED     |33   |
+|Rabat     |ENDED         |495  |
+|Marrakech |ENDED         |586  |
+|Rabat     |FAULT_REPORTED|28   |
+|Casablanca|UNLOCKED      |888  |
+|Tanger    |RESERVED      |564  |
+|Tanger    |ENDED         |486  |
++----------+--------------+-----+
+-------------------------------------------
+Batch: 8
+-------------------------------------------
++------------------------------------------+----------+-----+
+|fenetre                                   |city      |count|
++------------------------------------------+----------+-----+
+|{2026-10-21 09:10:00, 2026-10-21 09:20:00}|Rabat     |2    |
+|{2026-10-21 10:20:00, 2026-10-21 10:30:00}|Tanger    |3    |
+|{2026-10-21 10:20:00, 2026-10-21 10:30:00}|Casablanca|3    |
+|{2026-10-21 10:40:00, 2026-10-21 10:50:00}|Casablanca|4    |
+|{2026-10-21 11:00:00, 2026-10-21 11:10:00}|Marrakech |4    |
+|{2026-10-21 11:20:00, 2026-10-21 11:30:00}|Rabat     |4    |
+|{2026-10-21 12:00:00, 2026-10-21 12:10:00}|Casablanca|4    |
+|{2026-10-21 12:00:00, 2026-10-21 12:10:00}|Tanger    |5    |
++------------------------------------------+----------+-----+
+only showing top 8 rows
+-------------------------------------------
+Batch: 10
+-------------------------------------------
++----------+------------+----------+---------+----------+---------+-------------------+---------+------+
+|trip_id   |vehicle_type|city      |status   |duration_s|price_mad|event_time         |partition|offset|
++----------+------------+----------+---------+----------+---------+-------------------+---------+------+
+|T-00006348|BIKE        |Casablanca|RESERVED |NULL      |NULL     |2026-10-21 15:58:32|0        |2818  |
+|T-00006348|BIKE        |Casablanca|CANCELLED|NULL      |NULL     |2026-10-21 15:59:42|0        |2819  |
+|T-00001577|EBIKE       |Casablanca|ENDED    |1688      |22.69    |2026-10-21 16:02:32|0        |2820  |
+|T-00013851|EBIKE       |Rabat     |ENDED    |2437      |31.43    |2026-10-21 16:04:52|0        |2821  |
+|T-00015092|EBIKE       |Marrakech |RESERVED |NULL      |NULL     |2026-10-21 16:06:25|0        |2822  |
+|T-00003081|EBIKE       |Rabat     |ENDED    |1426      |19.64    |2026-10-21 16:07:45|0        |2823  |
+|T-00015092|EBIKE       |Marrakech |UNLOCKED |NULL      |NULL     |2026-10-21 16:09:31|0        |2824  |
+|T-00012392|BIKE        |Casablanca|RESERVED |NULL      |NULL     |2026-10-21 16:12:32|0        |2825  |
++----------+------------+----------+---------+----------+---------+-------------------+---------+------+
+only showing top 8 rows
+-------------------------------------------
+Batch: 10
+-------------------------------------------
++----------+--------------+-----+
+|city      |status        |count|
++----------+--------------+-----+
+|Casablanca|ENDED         |914  |
+|Marrakech |FAULT_REPORTED|21   |
+|Rabat     |UNLOCKED      |563  |
+|Casablanca|FAULT_REPORTED|39   |
+|Casablanca|CANCELLED     |68   |
+|Marrakech |RESERVED      |717  |
+|Casablanca|RESERVED      |1022 |
+|Marrakech |CANCELLED     |58   |
+|Marrakech |UNLOCKED      |658  |
+|Tanger    |FAULT_REPORTED|30   |
+|Rabat     |RESERVED      |586  |
+|Tanger    |CANCELLED     |45   |
+|Tanger    |UNLOCKED      |546  |
+|Rabat     |CANCELLED     |33   |
+|Rabat     |ENDED         |521  |
+|Marrakech |ENDED         |631  |
+|Rabat     |FAULT_REPORTED|31   |
+|Casablanca|UNLOCKED      |960  |
+|Tanger    |RESERVED      |596  |
+|Tanger    |ENDED         |514  |
++----------+--------------+-----+
+-------------------------------------------
+Batch: 9
+-------------------------------------------
++------------------------------------------+----------+-----+
+|fenetre                                   |city      |count|
++------------------------------------------+----------+-----+
+|{2026-10-21 16:30:00, 2026-10-21 16:40:00}|Marrakech |4    |
+|{2026-10-21 17:20:00, 2026-10-21 17:30:00}|Tanger    |4    |
+|{2026-10-21 17:30:00, 2026-10-21 17:40:00}|Marrakech |4    |
+|{2026-10-21 17:40:00, 2026-10-21 17:50:00}|Casablanca|20   |
+|{2026-10-21 19:00:00, 2026-10-21 19:10:00}|Tanger    |1    |
+|{2026-10-21 15:50:00, 2026-10-21 16:00:00}|Casablanca|5    |
+|{2026-10-21 16:40:00, 2026-10-21 16:50:00}|Rabat     |4    |
+|{2026-10-21 19:40:00, 2026-10-21 19:50:00}|Casablanca|10   |
++------------------------------------------+----------+-----+
+only showing top 8 rows
+### console_raw          micro-batch  10 :   530 lignes, 1082 lignes/s, trigger 490 ms
+### bronze_raw           micro-batch  10 :   530 lignes, 630 lignes/s, trigger 841 ms
+### counts_city_status   micro-batch  10 :   530 lignes, 592 lignes/s, trigger 895 ms
+### wm_windows           micro-batch   9 :   530 lignes, 454 lignes/s, trigger 1167 ms
+-------------------------------------------
+Batch: 11
+-------------------------------------------
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+|trip_id   |vehicle_type|city      |status  |duration_s|price_mad|event_time         |partition|offset|
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+|T-00008519|BIKE        |Casablanca|ENDED   |329       |5.74     |2026-10-21 20:02:03|0        |2996  |
+|T-00010811|SCOOTER     |Tanger    |RESERVED|NULL      |NULL     |2026-10-21 20:07:34|0        |2997  |
+|T-00002005|EBIKE       |Rabat     |RESERVED|NULL      |NULL     |2026-10-21 20:08:33|0        |2998  |
+|T-00002005|EBIKE       |Rabat     |UNLOCKED|NULL      |NULL     |2026-10-21 20:10:15|0        |2999  |
+|T-00012875|SCOOTER     |Rabat     |RESERVED|NULL      |NULL     |2026-10-21 20:11:16|0        |3000  |
+|T-00011865|BIKE        |Casablanca|ENDED   |1229      |13.24    |2026-10-21 20:12:19|0        |3001  |
+|T-00010811|SCOOTER     |Tanger    |UNLOCKED|NULL      |NULL     |2026-10-21 20:12:30|0        |3002  |
+|T-00012875|SCOOTER     |Rabat     |UNLOCKED|NULL      |NULL     |2026-10-21 20:15:11|0        |3003  |
++----------+------------+----------+--------+----------+---------+-------------------+---------+------+
+only showing top 8 rows
+-------------------------------------------
+Batch: 11
+-------------------------------------------
++----------+--------------+-----+
+|city      |status        |count|
++----------+--------------+-----+
+|Casablanca|ENDED         |956  |
+|Marrakech |FAULT_REPORTED|23   |
+|Rabat     |UNLOCKED      |585  |
+|Casablanca|FAULT_REPORTED|43   |
+|Casablanca|CANCELLED     |70   |
+|Marrakech |RESERVED      |767  |
+|Casablanca|RESERVED      |1073 |
+|Marrakech |CANCELLED     |59   |
+|Marrakech |UNLOCKED      |707  |
+|Tanger    |FAULT_REPORTED|31   |
+|Rabat     |RESERVED      |611  |
+|Tanger    |CANCELLED     |50   |
+|Tanger    |UNLOCKED      |570  |
+|Rabat     |CANCELLED     |36   |
+|Rabat     |ENDED         |541  |
+|Marrakech |ENDED         |675  |
+|Rabat     |FAULT_REPORTED|32   |
+|Casablanca|UNLOCKED      |1008 |
+|Tanger    |RESERVED      |625  |
+|Tanger    |ENDED         |538  |
++----------+--------------+-----+
+-------------------------------------------
+Batch: 10
+-------------------------------------------
++------------------------------------------+----------+-----+
+|fenetre                                   |city      |count|
++------------------------------------------+----------+-----+
+|{2026-10-21 20:40:00, 2026-10-21 20:50:00}|Marrakech |4    |
+|{2026-10-21 21:50:00, 2026-10-21 22:00:00}|Rabat     |3    |
+|{2026-10-21 22:30:00, 2026-10-21 22:40:00}|Tanger    |3    |
+|{2026-10-22 00:10:00, 2026-10-22 00:20:00}|Rabat     |2    |
+|{2026-10-22 04:30:00, 2026-10-22 04:40:00}|Casablanca|1    |
+|{2026-10-22 05:40:00, 2026-10-22 05:50:00}|Marrakech |3    |
+|{2026-10-22 06:00:00, 2026-10-22 06:10:00}|Rabat     |4    |
+|{2026-10-22 06:20:00, 2026-10-22 06:30:00}|Tanger    |5    |
++------------------------------------------+----------+-----+
+only showing top 8 rows
+-------------------------------------------
+Batch: 11
+-------------------------------------------
++-------+----+-----+
+|fenetre|city|count|
++-------+----+-----+
++-------+----+-----+
+### console_raw          micro-batch  11 :   447 lignes, 527 lignes/s, trigger 848 ms
+### bronze_raw           micro-batch  11 :   447 lignes, 292 lignes/s, trigger 1531 ms
+### counts_city_status   micro-batch  11 :   447 lignes, 163 lignes/s, trigger 2741 ms
+### wm_windows           micro-batch  11 :     0 lignes, 0 lignes/s, trigger 453 ms
+### console_raw          micro-batch  12 :     0 lignes, 0 lignes/s, trigger 6 ms
+### bronze_raw           micro-batch  12 :     0 lignes, 0 lignes/s, trigger 8 ms
+### counts_city_status   micro-batch  12 :     0 lignes, 0 lignes/s, trigger 8 ms
+### wm_windows           micro-batch  12 :     0 lignes, 0 lignes/s, trigger 7 ms
+### console_raw          micro-batch  12 :     0 lignes, 0 lignes/s, trigger 10 ms
+### bronze_raw           micro-batch  12 :     0 lignes, 0 lignes/s, trigger 9 ms
+### counts_city_status   micro-batch  12 :     0 lignes, 0 lignes/s, trigger 8 ms
+### wm_windows           micro-batch  12 :     0 lignes, 0 lignes/s, trigger 7 ms
+### console_raw          micro-batch  12 :     0 lignes, 0 lignes/s, trigger 7 ms
+### bronze_raw           micro-batch  12 :     0 lignes, 0 lignes/s, trigger 6 ms
+### counts_city_status   micro-batch  12 :     0 lignes, 0 lignes/s, trigger 9 ms
+### wm_windows           micro-batch  12 :     0 lignes, 0 lignes/s, trigger 8 ms
