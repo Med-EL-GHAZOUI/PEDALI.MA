@@ -11,7 +11,7 @@ Branche Git : `personne1`
 - [x] Notebook `01_spark_setup.ipynb` : SparkSession (version, master, appName, defaultParallelism)
 
 ## Partie 2 - RDD
-- [ ] Chargement JSONL et calculs RDD : revenus par ville, duree moyenne, top 5 stations
+- [x] Chargement JSONL et calculs RDD : revenus par ville, duree moyenne, top 5 stations (identiques a la reference P2, voir `notebooks/02_rdd.ipynb`)
 
 ## Partie 3 - SQL / DataFrames
 - [ ] DataFrames, SQL, UDF, agregations
