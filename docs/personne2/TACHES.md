@@ -11,7 +11,7 @@ Branche Git : `personne2`
 
 ## Donnees (Parties 2 et 3)
 - [x] Etude de trips_history.jsonl et stations.json, schema documente (`docs/schema_donnees.md`)
-- [x] Jeu de donnees (20 100 trajets, 96 stations) + `generate_sample_data.py`
+- [x] Jeu de donnees (20 100 trajets, 12 stations) + `generate_sample_data.py`
 - [x] Controle qualite `validate_data.py`
 - [x] Schema Spark explicite (`data/pedali_schema.py`)
 

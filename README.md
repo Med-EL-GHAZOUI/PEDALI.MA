@@ -49,6 +49,7 @@ Interfaces : Spark Master http://localhost:8080 - Jupyter http://localhost:8888 
 - [Partie 4 - Streaming](docs/partie4_streaming.md)
 - [Partie 5 - Delta Lake](docs/partie5_delta.md) et [pipeline (Personne 1)](docs/personne1/PIPELINE.md)
 - [Partie 6 - Graphes](docs/partie6_graphes.md)
+- [Rapport de projet (PDF, 5 pages)](docs/rapport_pedali.pdf)
 
 ## Preuves (dossier `reports/`)
 
